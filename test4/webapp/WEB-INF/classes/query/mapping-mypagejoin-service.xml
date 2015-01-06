@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+		<query id="findMyPageJoinList" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			WITH A1 AS(
+			      SELECT A.POLL_IDX
+			          , A.POLL_TITLE
+			          , A.POLL_TERMSTART
+			          , A.POLL_TERMEND
+			          , A.POLL_TARGET
+			          , A.POLL_OPEN
+			          , A.POLL_SAMPLE
+			          , A.POLL_GUBUN
+			  		  , A.POLL_STOPYN
+			          , B.* 
+			      FROM POLL_MNG A, DTL_CODE B
+			      WHERE 1=1
+				      AND A.POLL_ASK = B.CODE_ID
+                      AND A.POLL_GUBUN ='LL101'
+				      AND B.USE_YN = 'Y'
+				      AND B.MID_CODE = 'AA000'
+			), A2 AS(
+			    SELECT A.POLL_IDX, B.CODE_NAME AS GUBUN_NAME 
+			      FROM POLL_MNG A, DTL_CODE B
+			      WHERE 1=1
+				      AND A.POLL_FIELD = B.CODE_ID
+				      AND B.USE_YN = 'Y'
+				      AND B.MID_CODE = 'BB000'
+			)
+			SELECT A.CODE_ID
+			  , A.CODE_NAME
+			  , B.GUBUN_NAME
+			  , A.POLL_IDX
+			  , A.POLL_TITLE
+			  , TO_CHAR(A.POLL_TERMSTART, 'YYYY-MM-DD') POLL_TERMSTART_YMD
+			  , TO_CHAR(A.POLL_TERMSTART, 'HH24') POLL_TERMSTART_HOUR
+			  , TO_CHAR(A.POLL_TERMSTART, 'MI') POLL_TERMSTART_MINUTE
+			  , TO_CHAR(A.POLL_TERMEND, 'YYYY-MM-DD') POLL_TERMEND_YMD
+			  , TO_CHAR(A.POLL_TERMEND, 'HH24') POLL_TERMEND_HOUR
+			  , TO_CHAR(A.POLL_TERMEND, 'MI') POLL_TERMEND_MINUTE
+			  , A.POLL_TARGET
+			  , A.POLL_OPEN
+			  , A.POLL_STOPYN
+			  , ( SELECT COUNT(L.PANEL_ID) 
+				    FROM PANEL_STATE L
+				   WHERE L.POLL_IDX = A.POLL_IDX
+                     AND L.FILTER_YN = 'Y'
+                     AND L.PROG_YN = 'Y'
+			     ) AS POLL_SAMPLE
+			  
+			  , C.FILTER_YN  		/*2013.10.10하현숙 추가*/
+			  , NVL(C.PROG_YN, 'N') 		AS PROG_YN
+			  , NVL(C.NEXT_QUEST_NO, '0')	AS	NEXT_QUEST_NO
+			FROM A1 A, A2 B, PANEL_STATE C
+			WHERE 1=1
+				AND A.POLL_IDX = B.POLL_IDX
+				AND A.POLL_IDX = C.POLL_IDX(+)
+				AND C.PANEL_ID = :vo.userId
+				/*AND A.POLL_OPEN = 'Y'
+				AND A.POLL_STOPYN = 'N'
+				AND C.FILTER_YN = 'Y'*/  /*2013.10.10하현숙 수정*/
+				AND C.PROG_YN = 'Y'
+			#if ($vo.pollDivisionName)
+				AND A.CODE_NAME LIKE '%' || :vo.pollDivisionName || '%'
+			#elseif ($vo.pollTitle)
+				AND A.POLL_TITLE LIKE '%' || :vo.pollTitle || '%'
+			#elseif ($vo.searchKeyword)
+				AND (A.CODE_NAME LIKE '%' || :vo.searchKeyword || '%' OR A.POLL_TITLE LIKE '%' || :vo.searchKeyword || '%') 
+			#end
+			
+			ORDER BY A.POLL_TERMSTART desc
+			]]>
+			</statement>
+			<result class="seoul.research.domain.MyPageJoin" />
+		</query>
+	</queries>
+</queryservice>

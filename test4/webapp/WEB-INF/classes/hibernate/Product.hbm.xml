@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.sds.emp.domain.Product" table="PRODUCT">
+        <id name="prodNo" type="string">
+            <column name="PROD_NO" length="16" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="category" class="com.sds.emp.domain.Category">
+            <column name="CATEGORY_NO" length="16" />
+        </many-to-one>
+        <property name="prodName" type="string">
+            <column name="PROD_NAME" length="100" />
+        </property>
+        <property name="sellerId" type="string">
+            <column name="SELLER_ID" length="20" />
+        </property>
+        <property name="prodDetail" type="string">
+            <column name="PROD_DETAIL" length="200" />
+        </property>
+        <property name="manufactureDay" type="string">
+            <column name="MANUFACTURE_DAY" length="8" />
+        </property>
+        <property name="asYn" type="string">
+            <column name="AS_YN" length="1" />
+        </property>
+        <property name="sellQuantity" type="java.math.BigDecimal">
+            <column name="SELL_QUANTITY" precision="5" scale="0" />
+        </property>
+        <property name="sellAmount" type="java.math.BigDecimal">
+            <column name="SELL_AMOUNT" precision="10" scale="0" />
+        </property>
+        <property name="imageFile" type="string" update="false">
+            <column name="IMAGE_FILE" length="100" />
+        </property>
+        <property name="regDate" type="date" update="false">
+            <column name="REG_DATE" length="0" />
+        </property>
+    </class>    
+    
+	<query name="countProductListByCategory">
+		<![CDATA[
+		FROM Product product WHERE product.category.categoryNo = :categoryNo
+		]]>		
+	</query>
+    
+</hibernate-mapping>

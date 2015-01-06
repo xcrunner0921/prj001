@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+		<query id="findgetPanelInfoByPk" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			SELECT A.PNL_ID, A.PNL_NAME  
+				  , CASE WHEN A.PNL_SUBJECT IS NULL THEN ' '
+				         ELSE A.PNL_SUBJECT END PNL_SUBJECT
+				  , CASE WHEN A.DELFLAG = 'N' THEN '가입' 
+				         ELSE '탈퇴' END DELFLAG
+				  , A.REG_DATE 
+				  , A.GRADE 
+				  , B.M001_BIRTH_DT AS BIRTHDAY
+				  , CASE WHEN B.M001_SEX = '1' OR B.M001_SEX = '3' OR B.M001_SEX = '5' THEN '남'
+				         ELSE '여' END  MF
+				  , B.SIDO AS SIDO
+				  , B.M001_EMAIL AS EMAIL
+			FROM PANEL A, VW_MEM001_M_RESEARCH_01 B
+			WHERE A.PNL_ID = B.M001_ID
+				  AND A.PNL_ID= :vo.pnlId
+			]]>
+			</statement>
+			<result class="seoul.research.domain.Panel" />
+		</query>
+		
+		<query id="getPanelCount" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			SELECT NVL(COUNT(A.PNL_ID),0) AS CNT
+			 FROM PANEL A
+			WHERE A.PNL_ID= :vo.pnlId
+			]]>
+			</statement>
+		</query>
+		
+		<!-- 패널 탈퇴 수정 : 가입에서 탈퇴로 수정(N->Y) 
+			 UPDATE POR_USER 
+			   SET POR_DELFLAG = 'Y', POR_RDATE = sysdate
+			 WHERE POR_ID= :vo.pnlId AND POR_DELFLAG = 'N' -->		
+		<query id="updatePanelDelflagN" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			 	
+			 UPDATE PANEL
+			   SET DELFLAG = 'Y' , REG_DATE = sysdate
+			 WHERE PNL_ID= :vo.pnlId AND DELFLAG = 'N'		
+			]]>
+			</statement>
+		</query>
+		
+		<!-- 패널 탈퇴 수정 : 가입에서 탈퇴로 수정(Y->N)  			
+			UPDATE POR_USER 
+			   SET POR_DELFLAG = 'N', POR_RDATE = sysdate
+			 WHERE POR_ID= :vo.pnlId AND POR_DELFLAG = 'Y' 			
+		-->		
+		<query id="updatePanelDelflagY" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			 UPDATE PANEL
+			   SET DELFLAG = 'N' , REG_DATE = sysdate
+			 WHERE PNL_ID= :vo.pnlId AND DELFLAG = 'Y'	
+			]]>
+			</statement>
+		</query>
+		
+		<!-- 패널 : s_no  -->
+		<query id="getSNo" isDynamic="false">
+			<statement>
+			<![CDATA[
+				SELECT NVL(MAX(S_NO), 0) + 1 S_NO
+				FROM PANEL
+			]]>
+			</statement>
+		</query>
+		
+		<!-- 패널 신규등록 -->
+		<query id="createPanel" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			 INSERT INTO PANEL (
+			 	S_NO, PNL_ID, PNL_NAME, DELFLAG, 
+			 	REG_DATE, GRADE , PNL_SUBJECT
+			 )
+			 VALUES(
+			  	:vo.SNo, :vo.pnlId,  :vo.pnlName,  'N',
+			  	sysdate, 1 , 'MM001'
+			  )
+			]]>
+			</statement>
+		</query>
+		
+		<!-- 회원 통합 정보 등록 -->
+		<query id="createTbmem001" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			 INSERT INTO TB_MEM001_M_RESEARCH (
+			 	PNL_ID, MF, AGE, AGE_GROUP, REGION
+			 )
+			 VALUES(
+			    :vo.pnlId, :vo.mf, :vo.age, :vo.ageGroup, :vo.sido
+			  )
+			]]>
+			</statement>
+		</query>
+		<!-- 회원 통합정보 확인  -->
+		<query id="getTbmem001Count" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			SELECT NVL(COUNT(A.PNL_ID),0) AS CNT
+			 FROM TB_MEM001_M_RESEARCH A
+			WHERE A.PNL_ID= :vo.pnlId
+			]]>
+			</statement>
+		</query>
+	</queries>
+</queryservice>

@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+		<query id="findPollMng4List" isDynamic="true">
+			<statement>
+			<![CDATA[
+				SELECT *
+				FROM (
+					SELECT POLL_IDX,
+					       POLL_TITLE, POLL_TERMSTART, POLL_TERMEND, REG_DATE,
+                           CASE WHEN POLL_GUBUN='LL101' THEN                            
+                                        (SELECT COUNT(*) FROM PANEL_STATE WHERE POLL_IDX = PM.POLL_IDX AND FILTER_YN = 'Y' AND PROG_YN = 'Y') 
+                                ELSE POLL_SAMPLE END  PANEL_CNT,
+					       POLL_OPEN,
+					       CASE WHEN POLL_TERMSTART > SYSDATE THEN 'S'
+					       		WHEN POLL_STOPYN = 'Y' THEN 'T'
+					            WHEN POLL_STOPCOND = '1' THEN
+					                 CASE WHEN POLL_TERMSTART <= SYSDATE AND POLL_TERMEND >= SYSDATE THEN 'P'
+					                      ELSE 'C'
+					                 END
+					            WHEN POLL_STOPCOND = '2' THEN
+					                 CASE WHEN POLL_SAMPLE > (SELECT COUNT(*) FROM PANEL_STATE WHERE POLL_IDX = PM.POLL_IDX AND FILTER_YN = 'Y' AND PROG_YN = 'Y') THEN 'P'
+					                      ELSE 'C'
+					                 END
+					       END POLL_STOP,
+					       POLL_GUBUN
+					FROM POLL_MNG PM
+				)
+				WHERE POLL_STOP <> 'S'
+				#if ($vo.searchRegDatestart) 
+				  AND TO_CHAR(POLL_TERMSTART, 'YYYY-MM-DD') >= :vo.searchRegDatestart
+				#end  
+				#if ($vo.searchRegDateend) 
+				  AND TO_CHAR(POLL_TERMSTART, 'YYYY-MM-DD') <= :vo.searchRegDateend
+				#end  
+				#if ($vo.searchPollStop != "")
+				  AND POLL_STOP = :vo.searchPollStop
+				#end
+				#if ($vo.searchPollTitle)
+				  AND POLL_TITLE LIKE '%' || :vo.searchPollTitle || '%'
+				#end
+				ORDER BY POLL_TERMSTART DESC
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PollMng" />
+		</query>
+
+		<query id="findPollMng3ByPk">
+			<statement>
+			<![CDATA[
+				SELECT POLL_IDX,
+					   POLL_FIELD, POLL_ASK, POLL_DEPARTMENT, POLL_TITLE,
+					   TO_CHAR(POLL_TERMSTART, 'YYYY-MM-DD') POLL_TERMSTART_YMD,
+					   TO_CHAR(POLL_TERMSTART, 'HH24') POLL_TERMSTART_HOUR,
+					   TO_CHAR(POLL_TERMSTART, 'MI') POLL_TERMSTART_MINUTE,
+					   TO_CHAR(POLL_TERMEND, 'YYYY-MM-DD') POLL_TERMEND_YMD,
+					   TO_CHAR(POLL_TERMEND, 'HH24') POLL_TERMEND_HOUR,
+					   TO_CHAR(POLL_TERMEND, 'MI') POLL_TERMEND_MINUTE,
+					   POLL_TARGET, POLL_SAMPLE, POLL_COMPANY, POLL_METHOD, POLL_CONTENTS,
+					   POLL_KEYWORD, POLL_STOPYN, POLL_STOPCOND, POLL_OPEN, POLL_GRADE,
+					   POLL_HIT, POLL_BUDGET, POLL_CONTRACT, POLL_UTILIZE, POLL_REFER,
+					   POLL_OPINION
+				FROM POLL_MNG
+				WHERE POLL_IDX = :vo.pollIdx
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PollMng" />
+		</query>
+
+		<query id="findPollMng4ByPk">
+			<statement>
+			<![CDATA[
+				SELECT POLL_IDX,
+					   (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_FIELD) POLL_FIELD_NAME,
+					   (SELECT MAX(SUBSTR(SYS_CONNECT_BY_PATH(CODE_NAME, ', '), 3))
+						FROM (
+							SELECT ROWNUM RN, CODE_NAME
+							FROM DTL_CODE
+							WHERE INSTR((SELECT POLL_ASK FROM POLL_MNG WHERE POLL_IDX = :vo.pollIdx), CODE_ID) <> 0
+						)
+						START WITH RN = 1
+						CONNECT BY PRIOR RN = RN - 1) POLL_ASK_NAME,
+					   (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_DEPARTMENT) POLL_DEPARTMENT_NAME,
+					   POLL_TITLE,
+					   TO_CHAR(POLL_TERMSTART, 'YYYY-MM-DD') POLL_TERMSTART_YMD,
+					   TO_CHAR(POLL_TERMSTART, 'HH24') POLL_TERMSTART_HOUR,
+					   TO_CHAR(POLL_TERMSTART, 'MI') POLL_TERMSTART_MINUTE,
+					   TO_CHAR(POLL_TERMEND, 'YYYY-MM-DD') POLL_TERMEND_YMD,
+					   TO_CHAR(POLL_TERMEND, 'HH24') POLL_TERMEND_HOUR,
+					   TO_CHAR(POLL_TERMEND, 'MI') POLL_TERMEND_MINUTE,
+					   POLL_TARGET, POLL_SAMPLE,
+					   (SELECT MAX(SUBSTR(SYS_CONNECT_BY_PATH(CODE_NAME, ', '), 3))
+						FROM (
+							SELECT ROWNUM RN, CODE_NAME
+							FROM DTL_CODE
+							WHERE INSTR((SELECT POLL_COMPANY FROM POLL_MNG WHERE POLL_IDX = :vo.pollIdx), CODE_ID) <> 0
+						)
+						START WITH RN = 1
+						CONNECT BY PRIOR RN = RN - 1) POLL_COMPANY_NAME,
+					   (SELECT MAX(SUBSTR(SYS_CONNECT_BY_PATH(CODE_NAME, ', '), 3))
+						FROM (
+							SELECT ROWNUM RN, CODE_NAME
+							FROM DTL_CODE
+							WHERE INSTR((SELECT POLL_METHOD FROM POLL_MNG WHERE POLL_IDX = :vo.pollIdx), CODE_ID) <> 0
+						)
+						START WITH RN = 1
+						CONNECT BY PRIOR RN = RN - 1) POLL_METHOD_NAME,
+					   POLL_CONTENTS, POLL_KEYWORD, POLL_STOPYN, POLL_OPEN,
+					   (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_GRADE) POLL_GRADE_NAME,
+					   POLL_HIT, POLL_BUDGET,
+					   (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_CONTRACT) POLL_CONTRACT_NAME,
+					   POLL_UTILIZE, POLL_REFER, POLL_OPINION
+				FROM POLL_MNG PM
+				WHERE POLL_IDX = :vo.pollIdx
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PollMng" />
+		</query>
+
+		<query id="updatePollMng2">
+			<statement>
+			<![CDATA[
+				UPDATE POLL_MNG
+				SET POLL_FIELD = :vo.pollField, POLL_ASK = :vo.pollAsk, POLL_DEPARTMENT = :vo.pollDepartment, POLL_TITLE = :vo.pollTitle, POLL_TERMSTART = :vo.pollTermstart,
+					POLL_TERMEND = :vo.pollTermend, POLL_TARGET = :vo.pollTarget, POLL_SAMPLE = :vo.pollSample, POLL_COMPANY = :vo.pollCompany, POLL_METHOD = :vo.pollMethod,
+					POLL_CONTENTS = :vo.pollContents, POLL_KEYWORD = :vo.pollKeyword, POLL_STOPYN = :vo.pollStopyn, POLL_STOPCOND = :vo.pollStopcond, POLL_OPEN = :vo.pollOpen,
+					POLL_GRADE = :vo.pollGrade, POLL_HIT = :vo.pollHit, POLL_BUDGET = :vo.pollBudget, POLL_CONTRACT = :vo.pollContract, POLL_UTILIZE = :vo.pollUtilize,
+					POLL_REFER = :vo.pollRefer, POLL_OPINION = :vo.pollOpinion,
+					MOD_DATE = sysdate, MOD_ID = :vo.modId
+				WHERE POLL_IDX = :vo.pollIdx
+			]]>
+			</statement>
+		</query>
+
+		<query id="getNextSNo" isDynamic="true">
+			<statement>
+			<![CDATA[
+				SELECT NVL(MAX(S_NO), 0) + 1 S_NO
+				FROM POLL_ADDFILE
+				WHERE POLL_IDX = :vo.pollIdx
+			]]>
+			</statement>
+		</query>
+
+		<query id="findQuestMng2List">
+			<statement>
+			<![CDATA[
+				SELECT POLL_IDX, QUEST_NO,
+					   QUEST_TITLE
+				FROM QUEST_MNG
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_TYPE = 'HH103'
+			]]>
+			</statement>
+			<result class="seoul.research.domain.QuestMng" />
+		</query>
+
+		<query id="findQuestMng3List">
+			<statement>
+			<![CDATA[
+				SELECT POLL_IDX, QUEST_NO,
+					   QUEST_TITLE, QUEST_TYPE
+				FROM QUEST_MNG QM
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_TYPE <> 'HH103'
+				  AND (SELECT MAX(EXAM_NO) FROM EXAMPLE_MNG WHERE POLL_IDX = QM.POLL_IDX AND QUEST_NO = QM.QUEST_NO) = 99
+			]]>
+			</statement>
+			<result class="seoul.research.domain.QuestMng" />
+		</query>
+
+		<query id="findQuestMng4List">
+			<statement>
+			<![CDATA[
+				WITH AAA AS (
+					SELECT POLL_IDX, QUEST_NO, QUEST_NO * 100 SNO, QUEST_NO || '' HEADER
+					FROM QUEST_MNG
+					WHERE POLL_IDX = :vo.pollIdx
+					AND QUEST_TYPE IN ('HH101', 'HH103')
+					UNION ALL
+					SELECT QM.POLL_IDX, QM.QUEST_NO, QM.QUEST_NO * 100 + EM.EXAM_NO SNO, QM.QUEST_NO || '_' || EM.EXAM_NO HEADER
+					FROM QUEST_MNG QM, EXAMPLE_MNG EM
+					WHERE QM.POLL_IDX = EM.POLL_IDX
+					AND QM.QUEST_NO = EM.QUEST_NO
+					AND QM.POLL_IDX = :vo.pollIdx
+					AND QM.QUEST_TYPE = 'HH102'
+					UNION ALL
+					SELECT QM.POLL_IDX, QM.QUEST_NO, QM.QUEST_NO * 100 + EM.EXAM_NO SNO, QM.QUEST_NO || '_' || EM.EXAM_NO HEADER
+					FROM QUEST_MNG QM, EXAMPLE_MNG EM
+					WHERE QM.POLL_IDX = EM.POLL_IDX
+					AND QM.QUEST_NO = EM.QUEST_NO
+					AND QM.POLL_IDX = :vo.pollIdx
+					AND QM.QUEST_TYPE = 'HH104'
+					AND EM.EXAM_NO <= (SELECT CHOICE_CNT FROM QUEST_TYPE_MNG WHERE POLL_IDX = QM.POLL_IDX AND QUEST_NO = QM.QUEST_NO)
+					ORDER BY SNO
+				)
+				SELECT 'NO' HEADER
+				FROM DUAL
+				UNION ALL
+				SELECT 'ID' HEADER
+				FROM DUAL
+				UNION ALL
+				SELECT 'SQ1'
+				FROM DUAL
+				UNION ALL
+				SELECT 'SQ2'
+				FROM DUAL
+				UNION ALL
+				SELECT CASE WHEN QUEST_NO > (SELECT MAX(QUEST_NO) FROM QUEST_MNG WHERE POLL_IDX = A.POLL_IDX) - 4 THEN 'DQ'
+				            ELSE 'Q'
+				       END || HEADER
+				FROM AAA A
+			]]>
+			</statement>
+			<result class="seoul.research.domain.QuestMng" />
+		</query>
+
+		<query id="findQuestMng2ByPk">
+			<statement>
+			<![CDATA[
+				SELECT GET_CNTS(:vo.pollIdx) CNTS, GET_MAXS(:vo.pollIdx) MAXS, GET_CHOICE_CNTS(:vo.pollIdx) CHOICE_CNTS
+				FROM DUAL
+			]]>
+			</statement>
+			<result class="seoul.research.domain.QuestMng" />
+		</query>
+
+		<query id="findAnswerMngList">
+			<statement>
+			<![CDATA[
+				SELECT AM.PANEL_ID,
+                       DECODE(PS.MF, '남', '1', '여', '2', '9') MF,
+                       DECODE(PS.AGE_GROUP, '10대', '1', '20대', '2', '30대', '3', '40대', '4', '50대', '5', '60대 이상', '6', '9') AGE_GROUP,
+                       AM.ETC_ANSWER
+				FROM ANSWER_MNG AM, PANEL_STATE PS
+				WHERE AM.POLL_IDX = PS.POLL_IDX
+				  AND AM.PANEL_ID = PS.PANEL_ID
+				  AND AM.POLL_IDX = :vo.pollIdx
+				  AND AM.QUEST_NO = :vo.questNo
+                  AND PS.FILTER_YN = 'Y'
+                  AND PS.PROG_YN = 'Y'
+				ORDER BY AM.PANEL_ID
+			]]>
+			</statement>
+			<result class="seoul.research.domain.AnswerMng" />
+		</query>
+
+		<query id="findAnswerMng2List">
+			<statement>
+			<![CDATA[
+				SELECT AM.PANEL_ID,
+                       DECODE(PS.MF, '남', '1', '여', '2', '9') MF,
+                       DECODE(PS.AGE_GROUP, '10대', '1', '20대', '2', '30대', '3', '40대', '4', '50대', '5', '60대 이상', '6', '9') AGE_GROUP,
+                       NVL(AM.ETC_ANSWER, 'NULL') ETC_ANSWER
+				FROM ANSWER_MNG AM, PANEL_STATE PS
+				WHERE AM.POLL_IDX = PS.POLL_IDX
+				  AND AM.PANEL_ID = PS.PANEL_ID
+				  AND AM.POLL_IDX = :vo.pollIdx
+				  AND AM.QUEST_NO = :vo.questNo
+				#if ($vo.questType == "HH101")
+				  AND AM.ANSWER = 99
+				#else
+				  AND SUBSTR(AM.ANSWER, LENGTH(AM.ANSWER), 1) = '1'
+				#end
+                  AND PS.FILTER_YN = 'Y'
+                  AND PS.PROG_YN = 'Y'
+				ORDER BY AM.PANEL_ID
+			]]>
+			</statement>
+			<result class="seoul.research.domain.AnswerMng" />
+		</query>
+
+		<query id="findPanelStateList">
+			<statement>
+			<![CDATA[
+				SELECT PANEL_ID,
+                       DECODE(MF, '남', '1', '여', '2', '9') MF,
+                       DECODE(AGE_GROUP, '10대', '1', '20대', '2', '30대', '3', '40대', '4', '50대', '5', '60대 이상', '6', '9') AGE_GROUP,
+                       GET_ANSWERS(:vo.pollIdx, PANEL_ID) ANSWERS
+                FROM PANEL_STATE
+                WHERE POLL_IDX = :vo.pollIdx
+                  AND FILTER_YN = 'Y'
+                  AND PROG_YN = 'Y'
+                ORDER BY PANEL_ID
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PanelState" />
+		</query>
+	</queries>
+</queryservice>

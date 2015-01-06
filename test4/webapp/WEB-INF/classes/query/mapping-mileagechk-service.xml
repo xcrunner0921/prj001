@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+		<query id="findMileageChkList" isDynamic="true">
+			<statement>
+			<![CDATA[	
+				SELECT  A.POLL_TITLE 		AS  POLL_TITLE
+				  , A.POLL_IDX  		AS  POLL_SEQ
+				  , B.PANEL_ID  		AS  ID
+				  , DECODE(A.POLL_MILEAGE, '300', 'P2101T76', '400', 'P2101T77', '500', 'P2101T78', 'NULL') AS PATH
+				  , TO_CHAR(B.ANSWER_DATE, 'YYYY-MM-DD') 		AS  REGDATE
+				FROM POLL_MNG A, ANSWER_MNG B, PANEL_STATE C
+				WHERE 1=1
+				AND A.POLL_IDX = B.POLL_IDX
+				AND A.POLL_IDX = C.POLL_IDX
+				AND B.POLL_IDX = C.POLL_IDX
+				AND B.QUEST_NO = C.QUEST_NO
+				AND C.FILTER_YN = 'Y'
+				AND C.PROG_YN = 'Y'
+				
+				AND TO_CHAR(B.ANSWER_DATE, 'YYYY-MM-DD') BETWEEN :vo.schdate AND :vo.schdate2
+			
+				GROUP BY A.POLL_TITLE, A.POLL_IDX, B.PANEL_ID, A.POLL_MILEAGE, TO_CHAR(B.ANSWER_DATE, 'YYYY-MM-DD')
+			]]>
+			</statement>
+			<result class="seoul.research.domain.MileageChk" />
+		</query>
+	</queries>
+</queryservice>

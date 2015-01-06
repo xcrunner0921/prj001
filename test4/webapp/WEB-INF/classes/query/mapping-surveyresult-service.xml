@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+		<query id="findSurveyResultList" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			SELECT *
+				FROM (
+					SELECT POLL_IDX,
+					       (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_FIELD) POLL_FIELD_NAME,
+					       (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_ASK) POLL_ASK_NAME,
+					       POLL_FIELD, POLL_TITLE, POLL_TERMSTART, POLL_TERMEND,
+					       CASE WHEN POLL_GUBUN='LL101' THEN (SELECT COUNT(L.PANEL_ID) 
+																FROM PANEL_STATE L
+																WHERE L.POLL_IDX = PM.POLL_IDX
+																	AND L.FILTER_YN = 'Y'
+																	AND L.PROG_YN = 'Y' ) 
+								ELSE POLL_SAMPLE END	POLL_SAMPLE,
+					       CASE WHEN POLL_TERMSTART > SYSDATE THEN 'S' /*대기*/
+					       		WHEN POLL_STOPYN = 'Y' THEN 'T' /*일시중지*/
+					            WHEN POLL_STOPCOND = '1' THEN
+					                 CASE WHEN POLL_TERMSTART <= SYSDATE AND POLL_TERMEND >= SYSDATE THEN 'P'  /*진행*/
+					                      ELSE 'C'  /*완료*/
+					                 END
+					            WHEN POLL_STOPCOND = '2' THEN
+					                 CASE WHEN POLL_SAMPLE > (SELECT COUNT(*) FROM PANEL_STATE WHERE POLL_IDX = PM.POLL_IDX AND FILTER_YN = 'Y' AND PROG_YN = 'Y') THEN 'P'  /*진행*/
+					                      ELSE 'C'  /*완료*/
+					                 END
+					       END POLL_STOP,
+					       REG_DATE,
+					       POLL_ASK, POLL_GUBUN , POLL_STOPYN , POLL_OPEN , POLL_CONTENTS , POLL_KEYWORD , POLL_HIT , POLL_SUBJECT
+					FROM POLL_MNG PM
+				)
+				WHERE 1 = 1
+					AND	POLL_STOP = 'C'  
+					AND POLL_OPEN = 'Y'
+
+				#if ($vo.searchRegDatestart)  /* 조사기간 */ 
+				  AND POLL_TERMSTART >= :vo.searchRegDatestart
+				  AND POLL_TERMSTART <= :vo.searchRegDateend
+				#end  
+								
+				#if($vo.searchPollTitle)
+					#if (($vo.searchCondition == "") && ($vo.searchPollFieldName == "") )   /*** 구분선택안하고 검색선택안하고 검색어를 입력한 경우  ***/
+						AND (POLL_TITLE || '|' || POLL_KEYWORD || '|' || POLL_CONTENTS   LIKE '%' || :vo.searchPollTitle || '%' )
+					
+					#elseif ($vo.searchCondition == 1)     /* 조건 - 부서(2개 이상인 경우 있음) */ 
+						AND POLL_ASK IN (SELECT CODE_ID FROM DTL_CODE WHERE CODE_NAME LIKE '%' || :vo.searchPollAsk || '%' )
+											
+					#elseif ($vo.searchCondition == 2) /* 조건 - 제목 */ 
+						AND POLL_TITLE  LIKE '%' || :vo.searchPollTitle || '%' 
+					
+					#elseif ($vo.searchPollFieldName != "") /* 분야 */ 
+						AND POLL_FIELD = :vo.searchPollFieldName					
+					#end
+				
+				#end
+				
+				ORDER BY POLL_IDX DESC
+			]]>
+			</statement>
+			<result class="seoul.research.domain.SurveyResult" />
+		</query>
+		
+		<!-- 메인 여론조사결과조회 -->
+		<query id="findSurveyResultMainList" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			SELECT POLL_TITLE, REG_DATE
+			FROM (
+				SELECT POLL_TITLE, REG_DATE
+				 FROM POLL_MNG
+				WHERE POLL_STOPYN ='N'
+					AND POLL_OPEN = 'Y'
+				    AND POLL_TERMEND <= SYSDATE
+				    AND POLL_GRADE = 'GG901'			     
+					#if ($vo.searchPollTitle) 				  
+				    AND (POLL_TITLE || '|' || POLL_KEYWORD || '|' || POLL_CONTENTS   LIKE '%' || :vo.searchPollTitle || '%' )
+					#end  
+				ORDER BY POLL_TERMEND DESC
+			)
+			WHERE ROWNUM < 5
+			]]>
+			</statement>
+			<result class="seoul.research.domain.SurveyResult" />
+		</query>
+		
+		<!-- 여론조사 결과 팝업  -->
+		<query id="findSurveyResultPopByPk" isDynamic="true">
+			<statement>
+			<![CDATA[	
+				SELECT POLL_TITLE, POLL_TERMSTART, POLL_TERMEND,
+				       (SELECT MAX(SUBSTR(SYS_CONNECT_BY_PATH(CODE_NAME, ', '), 3))
+                        FROM (
+                            SELECT ROWNUM RN, CODE_NAME
+                            FROM DTL_CODE
+                            WHERE INSTR((SELECT POLL_ASK FROM POLL_MNG WHERE POLL_IDX = :vo.searchPollIdx), CODE_ID) <> 0
+                        )
+                        START WITH RN = 1
+                        CONNECT BY PRIOR RN = RN - 1) POLL_ASK_NAME,
+                       (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_DEPARTMENT) POLL_DEPARTMENT,                       
+				       POLL_CONTENTS, POLL_SAMPLE, POLL_REFER
+				 FROM POLL_MNG PM
+				WHERE  POLL_IDX = :vo.searchPollIdx 
+			]]>
+			</statement>
+			<result class="seoul.research.domain.SurveyResult" />
+		</query>
+		
+	</queries>
+</queryservice>
