@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.sds.emp.domain.Code" table="CODE">
+		<cache usage="read-write"/>
+		<composite-id name="id"
+			class="com.sds.emp.domain.CodeId">
+			<key-property name="codeType" type="string">
+				<column name="CODE_TYPE" length="3" />
+			</key-property>
+			<key-property name="code" type="string">
+				<column name="CODE" length="3" />
+			</key-property>
+		</composite-id>
+		<property name="codeName" type="string">
+			<column name="CODE_NAME" length="20" not-null="true" />
+		</property>
+		<property name="codeDesc" type="string">
+			<column name="CODE_DESC" length="100" />
+		</property>
+		<property name="regId" type="string">
+			<column name="REG_ID" length="20" />
+		</property>
+		<property name="regDate" type="date">
+			<column name="REG_DATE" length="0" />
+		</property>
+	</class>
+
+	<query name="getCodeList">
+		<![CDATA[
+		FROM Code code WHERE code.id.codeType = :codeType
+		]]>
+	</query>
+</hibernate-mapping>

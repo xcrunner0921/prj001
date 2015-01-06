@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+		<query id="findPartMngList" isDynamic="true">
+			<statement>
+			<![CDATA[
+				SELECT A.POLL_IDX, A.POLL_TITLE, B.PANEL_ID AS POLL_PANEL_ID
+				   , (SELECT PNL_NAME FROM PANEL WHERE B.PANEL_ID = PNL_ID) AS POLL_PANEL_NAME 
+				   , TO_CHAR(A.POLL_TERMSTART, 'YYYY-MM-DD') AS POLL_TERMSTART_YMD
+				   , TO_CHAR(A.POLL_TERMSTART, 'HH24') AS POLL_TERMSTART_HOUR
+				   , TO_CHAR(A.POLL_TERMSTART, 'MI') AS POLL_TERMSTART_MINUTE
+				   , TO_CHAR(A.POLL_TERMEND, 'YYYY-MM-DD') AS POLL_TERMEND_YMD
+				   , TO_CHAR(A.POLL_TERMEND, 'HH24') AS POLL_TERMEND_HOUR
+				   , TO_CHAR(A.POLL_TERMEND, 'MI') AS POLL_TERMEND_MINUTE
+				   , (SELECT TO_CHAR(MAX(ANSWER_DATE),'YYYY-MM-DD') FROM ANSWER_MNG C WHERE B.POLL_IDX = POLL_IDX AND B.PANEL_ID = PANEL_ID ) AS POLL_ANSWER_DATE
+				   , CASE WHEN FILTER_YN = 'Y' AND PROG_YN='Y' THEN 'C' /*완료*/
+				          WHEN FILTER_YN = 'N' AND PROG_YN='Y' THEN 'F' /*필터*/
+				          ELSE 'S' END POLL_PANEL_STATUS /*중지*/
+				   , CASE WHEN FILTER_YN = 'Y' AND PROG_YN='Y' THEN A.POLL_MILEAGE /*완료*/
+				          ELSE 0 END POLL_MILEAGE 
+				  FROM POLL_MNG A, PANEL_STATE B
+				WHERE 1=1 
+					AND A.POLL_IDX = B.POLL_IDX
+				
+				#if ($vo.searchPollIdx !="") /*여론조사건별조건*/
+					AND A.POLL_IDX = :vo.searchPollIdx 
+				#end
+				
+				#if ($vo.searchPollStatus == "C")  /*상태 조건*/
+					AND (FILTER_YN = 'Y' AND PROG_YN = 'Y') 
+				#elseif ($vo.searchPollStatus == "F")
+					AND (FILTER_YN = 'N' AND PROG_YN = 'Y')
+				#elseif ($vo.searchPollStatus == "S")
+					AND (PROG_YN = 'N') 
+				#end 
+				
+				#if($vo.searchPollText != "")   /*검색어조건*/
+					#if ($vo.searchPollType =="id")
+						AND B.PANEL_ID  LIKE '%' || :vo.searchPollText || '%'
+					#elseif ($vo.searchPollType =="name")
+						AND (SELECT PNL_NAME FROM PANEL WHERE B.PANEL_ID = PNL_ID ) LIKE '%' || :vo.searchPollText || '%'
+					#end
+				#end
+				
+				ORDER BY A.POLL_IDX DESC, POLL_PANEL_ID ASC
+				
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PartMng" />
+		</query>
+		
+		<!-- 여론조사 목록 -->
+		<query id="pollMngList" isDynamic="true">
+			<statement>
+			<![CDATA[
+				SELECT POLL_IDX, POLL_TITLE  
+				FROM POLL_MNG
+				WHERE POLL_GUBUN = 'LL101'
+				ORDER BY POLL_IDX
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PartMng" />
+		</query>
+		
+	</queries>
+</queryservice>

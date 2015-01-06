@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+		<query id="findPollMng2List" isDynamic="true">
+			<statement>
+			<![CDATA[
+				SELECT *
+				FROM (
+					SELECT POLL_IDX,
+					       (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_FIELD) POLL_FIELD_NAME,
+					       (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_ASK) POLL_ASK_NAME,
+					       POLL_TITLE, POLL_TERMSTART, POLL_TERMEND,
+					       CASE WHEN POLL_QUEST_STATUS = 'Y' THEN 'C'
+					       		WHEN (SELECT COUNT(*) FROM QUEST_MNG WHERE POLL_IDX = PM.POLL_IDX) > 0 THEN 'P'
+					            ELSE 'S'
+					       END POLL_QUEST,
+					       REG_DATE,
+					       POLL_ASK
+					FROM POLL_MNG PM
+				  	WHERE POLL_GUBUN = 'LL101'
+				)
+				WHERE 1 = 1
+				#if ($vo.searchRegDatestart)
+				  AND TO_CHAR(REG_DATE, 'YYYY-MM-DD') >= :vo.searchRegDatestart
+				#end
+				#if ($vo.searchRegDateend)
+				  AND TO_CHAR(REG_DATE, 'YYYY-MM-DD') <= :vo.searchRegDateend
+				#end
+				#if ($vo.searchPollQuest != "")
+				  AND POLL_QUEST = :vo.searchPollQuest
+				#end
+				#if ($vo.searchPollAsk != "")
+				  AND POLL_ASK = :vo.searchPollAsk
+				#end
+				#if ($vo.searchPollFieldName)
+				  AND POLL_FIELD_NAME LIKE '%' || :vo.searchPollFieldName || '%'
+				#elseif ($vo.searchPollTitle)
+				  AND POLL_TITLE LIKE '%' || :vo.searchPollTitle || '%'
+				#end
+				ORDER BY POLL_TERMSTART DESC
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PollMng" />
+		</query>
+
+		<query id="findQuestMngList">
+			<statement>
+			<![CDATA[
+				SELECT POLL_IDX, QUEST_NO,
+					   QUEST_TITLE, QUEST_TYPE, EXAM_TYPE, BRANCH_YN,
+					   CASE WHEN (SELECT COUNT(*) FROM EXAMPLE_MNG WHERE POLL_IDX = QM.POLL_IDX AND BRANCH_NO = QM.QUEST_NO) > 0 THEN 'Y'
+					        ELSE 'N'
+					   END BRANCHED_YN
+				FROM QUEST_MNG QM
+				WHERE POLL_IDX = :vo.pollIdx
+				ORDER BY QUEST_NO
+			]]>
+			</statement>
+			<result class="seoul.research.domain.QuestMng" />
+		</query>
+
+		<query id="createQuestMng">
+			<statement>
+			<![CDATA[
+				INSERT INTO QUEST_MNG (
+					POLL_IDX, QUEST_NO,
+					QUEST_TITLE, QUEST_TYPE, EXAM_TYPE, BRANCH_YN, EXAM_ROTATEYN,
+					GRAPH_TYPE, FILTER_YN, MERGE_TYPE, REG_DATE, REG_ID,
+					MOD_DATE, MOD_ID
+				)
+				VALUES (
+					:vo.pollIdx, :vo.questNo,
+					:vo.questTitle, :vo.questType, :vo.examType, :vo.branchYn, :vo.examRotateyn,
+					:vo.graphType, :vo.filterYn, :vo.mergeType, sysdate, :vo.regId,
+					sysdate, :vo.modId
+				)
+			]]>
+			</statement>
+		</query>
+
+		<query id="findQuestMngByPk">
+			<statement>
+			<![CDATA[
+				SELECT POLL_IDX, QUEST_NO,
+					   GRAPH_TYPE, QUEST_TITLE, QUEST_TYPE, EXAM_TYPE,
+					   (SELECT CHOICE_CNT FROM QUEST_TYPE_MNG WHERE POLL_IDX = QM.POLL_IDX AND QUEST_NO = QM.QUEST_NO AND QUEST_TYPE = QM.QUEST_TYPE) CHOICE_CNT,
+					   (SELECT CHOICE_RANGE FROM QUEST_TYPE_MNG WHERE POLL_IDX = QM.POLL_IDX AND QUEST_NO = QM.QUEST_NO AND QUEST_TYPE = QM.QUEST_TYPE) CHOICE_RANGE,
+					   FILTER_YN,
+					   (SELECT FILTER_ANSWER FROM FILTER_MNG WHERE POLL_IDX = QM.POLL_IDX AND QUEST_NO = QM.QUEST_NO) FILTER_ANSWER,
+					   MERGE_TYPE, BRANCH_YN, EXAM_ROTATEYN
+				FROM QUEST_MNG QM
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+			]]>
+			</statement>
+			<result class="seoul.research.domain.QuestMng" />
+		</query>
+
+		<query id="updateQuestMng">
+			<statement>
+			<![CDATA[
+				UPDATE QUEST_MNG
+				SET GRAPH_TYPE = :vo.graphType, QUEST_TITLE = :vo.questTitle, QUEST_TYPE = :vo.questType, EXAM_TYPE = :vo.examType, FILTER_YN = :vo.filterYn,
+					MERGE_TYPE = :vo.mergeType, BRANCH_YN = :vo.branchYn, EXAM_ROTATEYN = :vo.examRotateyn,
+					MOD_DATE = sysdate, MOD_ID = :vo.modId
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+			]]>
+			</statement>
+		</query>
+
+		<query id="removeQuestMng">
+			<statement>
+			<![CDATA[
+				DELETE FROM QUEST_MNG
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+			]]>
+			</statement>
+		</query>
+
+		<query id="getNextQuestNo" isDynamic="true">
+			<statement>
+			<![CDATA[
+			    SELECT NVL(MAX(QUEST_NO), 0) + 1 QUEST_NO
+			    FROM QUEST_MNG
+			    WHERE POLL_IDX = :vo.pollIdx
+			]]>
+			</statement>
+		</query>
+
+		<query id="setPollQuestStatus">
+			<statement>
+			<![CDATA[
+				UPDATE POLL_MNG
+				SET POLL_QUEST_STATUS = :vo.pollQuestStatus
+				WHERE POLL_IDX = :vo.pollIdx
+			]]>
+			</statement>
+		</query>
+
+		<query id="findExampleMngList">
+			<statement>
+			<![CDATA[
+				SELECT POLL_IDX, QUEST_NO, EXAM_NO,
+					   EXAM_TITLE, BRANCH_NO
+				FROM EXAMPLE_MNG
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+				ORDER BY EXAM_NO
+			]]>
+			</statement>
+			<result class="seoul.research.domain.ExampleMng" />
+		</query>
+
+		<query id="findExampleMng2List">
+			<statement>
+			<![CDATA[
+				SELECT MERGE_NO, MERGE_TITLE
+				FROM EXAMPLE_MNG
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+				GROUP BY MERGE_NO, MERGE_TITLE
+				-- ORDER BY MERGE_NO
+			]]>
+			</statement>
+			<result class="seoul.research.domain.ExampleMng" />
+		</query>
+
+		<query id="findImgMngList">
+			<statement>
+			<![CDATA[
+				SELECT *
+				FROM IMG_MNG
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+				ORDER BY EXAM_NO
+			]]>
+			</statement>
+			<result class="seoul.research.domain.ImgMng" />
+		</query>
+
+		<query id="findQuestAddfileList">
+			<statement>
+			<![CDATA[
+				SELECT *
+				FROM QUEST_ADDFILE
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+				-- ORDER BY EXAM_NO
+			]]>
+			</statement>
+			<result class="seoul.research.domain.QuestAddfile" />
+		</query>
+
+		<query id="createQuestTypeMng">
+			<statement>
+			<![CDATA[
+				INSERT INTO QUEST_TYPE_MNG (
+					POLL_IDX, QUEST_NO, QUEST_TYPE,
+					CHOICE_CNT, CHOICE_RANGE
+				)
+				VALUES (
+					:vo.pollIdx, :vo.questNo, :vo.questType,
+					:vo.choiceCnt, :vo.choiceRange
+				)
+			]]>
+			</statement>
+		</query>
+
+		<query id="createFilterMng">
+			<statement>
+			<![CDATA[
+				INSERT INTO FILTER_MNG (
+					POLL_IDX, QUEST_NO,
+					FILTER_ANSWER
+				)
+				VALUES (
+					:vo.pollIdx, :vo.questNo,
+					:vo.filterAnswer
+				)
+			]]>
+			</statement>
+		</query>
+
+		<query id="createExampleMng">
+			<statement>
+			<![CDATA[
+				INSERT INTO EXAMPLE_MNG (
+					POLL_IDX, QUEST_NO, EXAM_NO,
+					EXAM_TITLE, BRANCH_NO, MERGE_NO, MERGE_TITLE
+				)
+				VALUES (
+					:vo.pollIdx, :vo.questNo, :vo.examNo,
+					:vo.examTitle, :vo.branchNo, :vo.mergeNo, :vo.mergeTitle
+				)
+			]]>
+			</statement>
+		</query>
+
+		<query id="createImgMng">
+			<statement>
+			<![CDATA[
+				INSERT INTO IMG_MNG (
+					POLL_IDX, QUEST_NO, EXAM_NO,
+					ORG_FNAME, SAV_FNAME, FILE_PATH, FILE_SIZE, FILE_DESC
+				)
+				VALUES (
+					:vo.pollIdx, :vo.questNo, :vo.examNo,
+					:vo.orgFname, :vo.savFname, :vo.filePath, :vo.fileSize, :vo.fileDesc
+				)
+			]]>
+			</statement>
+		</query>
+
+		<query id="createQuestAddfile">
+			<statement>
+			<![CDATA[
+				INSERT INTO QUEST_ADDFILE (
+					POLL_IDX, QUEST_NO, POSITION,
+					ORG_FNAME, SAV_FNAME, FILE_PATH, FILE_SIZE
+				)
+				VALUES (
+					:vo.pollIdx, :vo.questNo, :vo.position,
+					:vo.orgFname, :vo.savFname, :vo.filePath, :vo.fileSize
+				)
+			]]>
+			</statement>
+		</query>
+
+		<query id="removeQuestTypeMng">
+			<statement>
+			<![CDATA[
+				DELETE FROM QUEST_TYPE_MNG
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+			]]>
+			</statement>
+		</query>
+
+		<query id="removeFilterMng">
+			<statement>
+			<![CDATA[
+				DELETE FROM FILTER_MNG
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+			]]>
+			</statement>
+		</query>
+
+		<query id="removeExampleMng">
+			<statement>
+			<![CDATA[
+				DELETE FROM EXAMPLE_MNG
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+			]]>
+			</statement>
+		</query>
+
+		<query id="removeImgMng">
+			<statement>
+			<![CDATA[
+				DELETE FROM IMG_MNG
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+			]]>
+			</statement>
+		</query>
+
+		<query id="removeQuestAddfile">
+			<statement>
+			<![CDATA[
+				DELETE FROM QUEST_ADDFILE
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND QUEST_NO = :vo.questNo
+			]]>
+			</statement>
+		</query>
+	</queries>
+</queryservice>

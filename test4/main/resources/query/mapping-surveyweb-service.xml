@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+		<query id="findSurveyWebList" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			WITH A1 AS(
+			      SELECT A.POLL_IDX
+			          , A.POLL_TITLE
+			          , A.POLL_MESSAGE
+			          , A.POLL_TERMSTART
+			          , A.POLL_TERMEND
+			          , A.POLL_TARGET
+			          , A.POLL_OPEN
+			          , A.POLL_SAMPLE
+			          , A.POLL_STOPYN
+
+						/*종료우선조건 추가 : 2013.10.24.하현숙 */
+						, CASE  WHEN A.POLL_TERMSTART > SYSDATE THEN 'S' /*대기*/
+					       		WHEN A.POLL_STOPYN = 'Y' THEN 'T' /*일시중지*/
+					            WHEN A.POLL_STOPCOND = '1' THEN
+					                 CASE WHEN A.POLL_TERMSTART <= SYSDATE AND A.POLL_TERMEND >= SYSDATE THEN 'P'  /*진행*/
+					                      ELSE 'C'  /*완료*/
+					                 END
+					            WHEN A.POLL_STOPCOND = '2' THEN
+					                 CASE WHEN A.POLL_SAMPLE > (SELECT COUNT(*) FROM PANEL_STATE WHERE POLL_IDX = A.POLL_IDX AND FILTER_YN = 'Y' AND PROG_YN = 'Y') THEN 'P'  /*진행*/
+					                      ELSE 'C'  /*완료*/
+					                 END
+					       		END POLL_STOPCOND
+			          , A.POLL_SUBJECT
+			          , B.* 
+			      FROM POLL_MNG A, DTL_CODE B
+			      WHERE 1=1
+				      AND A.POLL_ASK = B.CODE_ID
+				      AND B.USE_YN = 'Y'
+				      AND B.MID_CODE = 'AA000'
+			), A2 AS(
+			    SELECT A.POLL_IDX, B.CODE_NAME AS GUBUN_NAME 
+			      FROM POLL_MNG A, DTL_CODE B
+			      WHERE 1=1
+				      AND A.POLL_FIELD = B.CODE_ID
+				      AND B.USE_YN = 'Y'
+				      AND B.MID_CODE = 'BB000'
+			), A3 AS(
+				SELECT 
+		          POLL_IDX
+		          ,MFYN_CHK
+		          ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , A1.POLL_MFYN ) ORDER BY  A1.POLL_MFYN).EXTRACT('//text()'),2), ',', '') AS POLL_MFYN
+		          ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , A1.POLL_MFYN_NUMBER ) ORDER BY  A1.POLL_MFYN).EXTRACT('//text()'),2), ',', '') AS POLL_MFYN_NUMBER
+		          ,AGEYN_CHK
+		          ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , A1.POLL_AGEYN ) ORDER BY  A1.POLL_AGEYN).EXTRACT('//text()'),2), ',', '') AS POLL_AGEYN
+		          ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , A1.POLL_AGEYN_NUMBER ) ORDER BY  A1.POLL_AGEYN).EXTRACT('//text()'),2), ',', '') AS POLL_AGEYN_NUMBER
+		          ,REGIONYN_CHK
+		          ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , A1.POLL_REGIONYN ) ORDER BY A1.POLL_REGIONYN_NUMBER).EXTRACT('//text()'),2), ',', '') AS POLL_REGIONYN
+		          ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , A1.POLL_REGIONYN_NUMBER ) ORDER BY  A1.POLL_REGIONYN_NUMBER).EXTRACT('//text()'),2), ',', '') AS POLL_REGIONYN_NUMBER
+		          FROM (
+                     SELECT A.POLL_IDX
+                          , A.POLL_MFYN AS MFYN_CHK
+                          , DECODE(A.POLL_MFYN, 'Y', DECODE(B.PART_GUBUN, '1', '::'||C.CODE_NAME), '') AS POLL_MFYN
+                          , DECODE(A.POLL_MFYN, 'Y', DECODE(B.PART_GUBUN, '1', '::'||B.POR_CODE||'||'||B.PART_NUMBER), '') AS POLL_MFYN_NUMBER
+                          , A.POLL_AGEYN AS AGEYN_CHK 
+                          , DECODE(A.POLL_AGEYN, 'Y', DECODE(B.PART_GUBUN, '2', '::'||C.CODE_NAME), '') AS POLL_AGEYN
+                          , DECODE(A.POLL_AGEYN, 'Y', DECODE(B.PART_GUBUN, '2', '::'||B.POR_CODE||'||'||B.PART_NUMBER), '') AS POLL_AGEYN_NUMBER
+                          , A.POLL_REGIONYN AS REGIONYN_CHK
+                          , DECODE(A.POLL_REGIONYN, 'Y', DECODE(B.PART_GUBUN, '3', '::'||C.CODE_NAME), '') AS POLL_REGIONYN
+                          , DECODE(A.POLL_REGIONYN, 'Y', DECODE(B.PART_GUBUN, '3', '::'||B.POR_CODE||'||'||B.PART_NUMBER), '') AS POLL_REGIONYN_NUMBER
+                    FROM POLL_MNG A, POLL_PART B, DTL_CODE C
+                    WHERE 1=1
+	                    AND A.POLL_IDX = B.POLL_IDX
+	                    AND B.POR_CODE = C.CODE_ID
+                    ORDER BY B.PART_GUBUN
+                )A1
+		          GROUP BY POLL_IDX, MFYN_CHK, AGEYN_CHK, REGIONYN_CHK
+		      ), CNT1 AS(
+		            SELECT A.POLL_IDX
+		                  ,A.MF  AS PANEL_SEX
+		                  ,COUNT(1) AS CNT
+		            FROM PANEL_STATE A
+		            WHERE 1=1
+			            AND A.FILTER_YN = 'Y'
+			            AND A.PROG_YN   = 'Y'
+		            GROUP BY A.POLL_IDX ,A.MF
+		      		), CNT2 AS(
+		        	SELECT A.POLL_IDX
+			              ,A.REGION  AS PANEL_SIDO
+			              ,COUNT(1) AS CNT
+			        FROM PANEL_STATE A
+			        WHERE 1=1
+				        AND A.FILTER_YN = 'Y'
+				        AND A.PROG_YN   = 'Y'
+			        GROUP BY A.POLL_IDX ,A.REGION
+				    ), CNT3 AS( 
+				    SELECT POLL_IDX, PS.AGE_GROUP AS PANEL_GENERATION, COUNT(1) AS CNT
+					FROM PANEL_STATE PS
+				    WHERE 1=1
+					    AND FILTER_YN = 'Y'
+					    AND PROG_YN = 'Y'
+				    GROUP BY POLL_IDX,PS.AGE_GROUP
+				    )
+				    
+				    
+					SELECT A.CODE_ID
+						, A.CODE_NAME
+						, B.GUBUN_NAME
+						, A.POLL_IDX
+						, A.POLL_TITLE
+						, A.POLL_MESSAGE
+					   , TO_CHAR(A.POLL_TERMSTART, 'YYYY-MM-DD') 	AS	POLL_TERMSTART_YMD
+					   , TO_CHAR(A.POLL_TERMSTART, 'HH24') 			AS	POLL_TERMSTART_HOUR
+					   , TO_CHAR(A.POLL_TERMSTART, 'MI') 			AS	POLL_TERMSTART_MINUTE
+					   , TO_CHAR(A.POLL_TERMEND, 'YYYY-MM-DD') 		AS	POLL_TERMEND_YMD
+					   , TO_CHAR(A.POLL_TERMEND, 'HH24') 			AS	POLL_TERMEND_HOUR
+					   , TO_CHAR(A.POLL_TERMEND, 'MI') 				AS	POLL_TERMEND_MINUTE
+					   
+						, A.POLL_TARGET
+						, A.POLL_OPEN
+						, ( SELECT COUNT(L.PANEL_ID) 
+							FROM PANEL_STATE L
+							WHERE L.POLL_IDX = A.POLL_IDX
+							AND L.FILTER_YN = 'Y'
+							AND L.PROG_YN = 'Y'
+						) AS POLL_SAMPLE
+						
+						, NVL(C.PROG_YN, 'N') 				AS	PROG_YN
+						, NVL(C.NEXT_QUEST_NO, '0')			AS	NEXT_QUEST_NO
+						 
+						, NVL(D.MFYN_CHK,'N')  				AS  MFYN_CHK
+						, D.POLL_MFYN						AS	POLL_MFYN
+						, NVL(POLL_MFYN_NUMBER, '0') 		AS  POLL_MFYN_NUMBER
+						, F.PANEL_SEX						AS	PANEL_SEX
+						, F.PANEL_SEX_CNT      				AS  PANEL_SEX_CNT
+						
+						, NVL(D.AGEYN_CHK,'N')  			AS  AGEYN_CHK
+						, D.POLL_AGEYN						AS	POLL_AGEYN
+						, NVL(POLL_AGEYN_NUMBER, '0') 		AS  POLL_AGEYN_NUMBER
+						, F.PANEL_GENERATION				AS	PANEL_GENERATION
+						, F.PANEL_GENERATION_CNT      		AS  PANEL_GENERATION_CNT
+						    
+						, NVL(D.REGIONYN_CHK,'N')  			AS  REGIONYN_CHK
+						, D.POLL_REGIONYN					AS	POLL_REGIONYN
+						, NVL(POLL_REGIONYN_NUMBER, '0') 	AS  POLL_REGIONYN_NUMBER
+						, F.PANEL_SIDO						AS	PANEL_SIDO
+						, F.PANEL_SIDO_CNT               	AS  PANEL_SIDO_CNT
+					FROM A1 A
+			          , A2 B
+			          , A3 D
+			          , PANEL_STATE C
+			          ,(
+				          SELECT POLL_IDX
+				            ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , PANEL_SEX ) ORDER BY  CODE_ID).EXTRACT('//text()'),2), ',', '')         AS PANEL_SEX 
+				            ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , CNT1 ) ORDER BY  CODE_ID).EXTRACT('//text()'),2), ',', '')              AS PANEL_SEX_CNT
+				            ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , PANEL_SIDO ) ORDER BY  CODE_ID).EXTRACT('//text()'),2), ',', '')        AS PANEL_SIDO 
+				            ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , CNT2 ) ORDER BY  CODE_ID).EXTRACT('//text()'),2), ',', '')              AS PANEL_SIDO_CNT
+				            ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , PANEL_GENERATION ) ORDER BY  CODE_ID).EXTRACT('//text()'),2), ',', '')  AS PANEL_GENERATION 
+				            ,replace(SUBSTR(XMLAGG(XMLELEMENT( X, ',' , CNT3 ) ORDER BY  CODE_ID).EXTRACT('//text()'),2), ',', '')              AS PANEL_GENERATION_CNT
+				          FROM(
+			                    SELECT POLL_IDX
+			                        , CODE_ID
+			                        , DECODE(PANEL_SEX,'','',PANEL_SEX||'::') 					AS  PANEL_SEX
+			                        , DECODE(PANEL_SEX,'','',SUM(CNT1)||'::') 					AS  CNT1
+			                        , DECODE(PANEL_SIDO,'','',PANEL_SIDO||'::')  				AS  PANEL_SIDO
+			                        , DECODE(PANEL_SIDO,'','',SUM(CNT2)||'::') 					AS  CNT2
+			                        , DECODE(PANEL_GENERATION,'','',PANEL_GENERATION||'::')  	AS  PANEL_GENERATION
+			                        , DECODE(PANEL_GENERATION,'','',SUM(CNT3)||'::') 			AS  CNT3
+			                    FROM(
+			                      SELECT POLL_IDX, CODE_ID, 
+				                      PANEL_SEX,
+				                      '' AS PANEL_SIDO,
+				                      '' AS PANEL_GENERATION,
+				                      CNT AS CNT1, 0 AS CNT2, 0 AS CNT3
+			                      FROM CNT1 AA, DTL_CODE BB
+			                      WHERE 1=1
+				                      AND AA.PANEL_SEX = BB.CODE_NAME
+				                      AND BB.MID_CODE = 'FF100'
+			                      
+			                      UNION ALL
+			                      
+			                      SELECT POLL_IDX, CODE_ID,
+				                      '' AS PANEL_SEX,
+				                      PANEL_SIDO,
+				                      '' AS PANEL_GENERATION,
+				                      0 AS CNT1, CNT AS CNT2, 0 AS CNT3
+			                      FROM CNT2 AA, DTL_CODE BB
+			                      WHERE 1=1
+				                      AND AA.PANEL_SIDO = BB.CODE_NAME
+				                      AND BB.MID_CODE = 'FF300'
+			                      
+			                      UNION ALL
+			                      
+			                      SELECT POLL_IDX, CODE_ID, 
+				                      '' AS PANEL_SEX,
+				                      '' AS PANEL_SIDO,
+				                      PANEL_GENERATION,
+				                      0 AS CNT1, 0 AS CNT2, CNT AS CNT3
+			                      FROM CNT3 AA, DTL_CODE BB
+			                      WHERE 1=1
+				                      AND AA.PANEL_GENERATION = BB.CODE_NAME
+				                      AND BB.MID_CODE = 'FF200'
+			                    )
+			                    GROUP BY POLL_IDX, PANEL_SEX, PANEL_SIDO, PANEL_GENERATION, CODE_ID
+			                  )
+			                  GROUP BY POLL_IDX
+			          )F
+			WHERE 1=1
+				AND A.POLL_IDX = B.POLL_IDX
+				AND A.POLL_IDX = F.POLL_IDX(+)
+				AND A.POLL_IDX = D.POLL_IDX(+)
+				AND A.POLL_IDX = C.POLL_IDX(+)
+				AND C.PANEL_ID(+) = :vo.userId
+				AND A.POLL_OPEN = 'Y'
+				AND A.POLL_STOPYN = 'N' /*일시중지*/
+				AND A.POLL_STOPCOND <> 'C'    /*종료우선조건에 의해 완료가 아닌 것:2013.10.24 하현숙 수정*/
+      
+      		#if ($vo.pollDivisionName)
+				AND A.CODE_NAME LIKE '%' || :vo.pollDivisionName || '%'
+			#elseif ($vo.pollTitle)
+				AND A.POLL_TITLE LIKE '%' || :vo.pollTitle || '%'
+			#elseif ($vo.searchKeyword)
+				AND (A.CODE_NAME LIKE '%' || :vo.searchKeyword || '%' OR A.POLL_TITLE LIKE '%' || :vo.searchKeyword || '%') 
+			#end
+			
+				AND TO_CHAR(POLL_TERMSTART, 'YYYY-MM-DD-hh24-mi') <= (SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD-hh24-mi') FROM DUAL)
+				AND TO_CHAR(POLL_TERMEND, 'YYYY-MM-DD-hh24-mi') >= (SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD-hh24-mi') FROM DUAL)
+			ORDER BY A.POLL_TERMSTART desc
+			]]>
+			</statement>
+			<result class="seoul.research.domain.SurveyWeb" />
+		</query>
+		          
+		<query id="findSurveyWebByPk" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			WITH A1 AS(
+			      SELECT A.POLL_IDX
+			          , A.POLL_TITLE
+			          , A.POLL_MESSAGE
+			          , A.POLL_TERMSTART
+			          , A.POLL_TERMEND
+			          , A.POLL_TARGET
+			          , A.POLL_OPEN
+			          , A.POLL_SAMPLE
+			          , A.POLL_INTRO
+			          , A.POLL_MILEAGE
+			          , A.POLL_BGIMG
+			          , CASE WHEN A.POLL_TERMSTART > SYSDATE   THEN 'S' /*대기*/
+							 WHEN A.POLL_STOPYN = 'Y'          THEN 'T' /*일시중지*/
+							 WHEN A.POLL_STOPCOND = '1'        THEN CASE WHEN A.POLL_TERMSTART <= SYSDATE AND A.POLL_TERMEND >= SYSDATE THEN 'P'  /*진행*/
+                             		                           ELSE 'C'  /*완료*/
+                                                          	   END
+                                                          
+                        	WHEN A.POLL_STOPCOND = '2'        THEN CASE WHEN A.POLL_SAMPLE > (SELECT COUNT(*) FROM PANEL_STATE WHERE POLL_IDX = A.POLL_IDX AND FILTER_YN = 'Y' AND PROG_YN = 'Y') THEN 'P'  /*진행*/
+                                                          	  ELSE 'C'  /*완료*/
+                                                              END
+					        END POLL_STOPCOND
+					        
+			          , B.* 
+			      FROM POLL_MNG A, DTL_CODE B
+			      WHERE 1=1
+				      AND A.POLL_ASK = B.CODE_ID
+				      AND B.USE_YN = 'Y'
+				      AND B.MID_CODE = 'AA000'
+			), A2 AS(
+			    SELECT A.POLL_IDX, B.CODE_NAME AS GUBUN_NAME 
+			      FROM POLL_MNG A, DTL_CODE B
+			      WHERE 1=1
+				      AND A.POLL_FIELD = B.CODE_ID
+				      AND B.USE_YN = 'Y'
+				      AND B.MID_CODE = 'BB000'
+			)
+			SELECT A.CODE_ID
+			  , A.CODE_NAME
+			  , B.GUBUN_NAME
+			  , A.POLL_IDX
+			  , A.POLL_TITLE
+			  , A.POLL_MESSAGE
+			  , A.POLL_TERMSTART
+			  , A.POLL_TERMEND
+			  , A.POLL_TARGET
+			  , A.POLL_OPEN
+			  , A.POLL_SAMPLE
+			  , A.POLL_INTRO
+			  , A.POLL_MILEAGE
+			  , A.POLL_BGIMG
+			  , DECODE(A.POLL_STOPCOND, 'P', 'Y', 'N') AS POLL_STOPCOND
+			FROM A1 A, A2 B
+			WHERE 1=1
+				AND A.POLL_IDX = B.POLL_IDX
+			#if ($vo.PollIdx)
+				AND A.POLL_IDX = :vo.PollIdx
+			#end
+			ORDER BY A.POLL_TERMSTART
+			]]>
+			</statement>
+			<result class="seoul.research.domain.SurveyWeb" />
+		</query>
+				
+		<query id="createSurveyWeb">
+			<statement>
+			<![CDATA[
+				MERGE INTO ANSWER_MNG A
+				USING (
+				  SELECT 	:vo.pollIdx AS	POLL_IDX,
+				  			:vo.questNo AS	QUEST_NO,
+                 			:vo.panelId AS	PANEL_ID
+				  FROM DUAL
+				) B
+				ON (
+				  A.POLL_IDX = B.POLL_IDX AND
+				  A.QUEST_NO = B.QUEST_NO AND
+				  A.PANEL_ID = B.PANEL_ID
+				)
+				
+				WHEN MATCHED THEN UPDATE SET 
+				A.ANSWER = :vo.answer, A.ETC_ANSWER = :vo.etcAnswer, ANSWER_DATE = sysdate
+				WHEN NOT MATCHED THEN
+				  INSERT(
+					POLL_IDX
+					,QUEST_NO
+					,S_NO
+					,ANSWER
+					,ETC_ANSWER
+					,PANEL_ID
+					,ANSWER_DATE
+				) 
+				VALUES (
+					:vo.pollIdx
+					,:vo.questNo
+					,NVL((SELECT MAX(S_NO) + 1 FROM ANSWER_MNG WHERE POLL_IDX = :vo.pollIdx), 0)
+					,:vo.answer
+					,:vo.etcAnswer
+					,:vo.panelId
+					,sysdate
+				)
+			]]>
+			</statement>
+		</query>
+		
+		<query id="createSurveyWeb2">
+			<statement>
+			<![CDATA[
+				MERGE INTO PANEL_STATE A
+				USING (
+				  SELECT 	:vo.pollIdx AS	POLL_IDX,
+                 			:vo.panelId AS	PANEL_ID
+				  FROM DUAL
+				) B
+				ON (
+				  A.POLL_IDX = B.POLL_IDX AND
+				  A.PANEL_ID = B.PANEL_ID
+				)
+				
+				WHEN MATCHED THEN UPDATE SET A.NEXT_QUEST_NO = :vo.nextQuestNo , A.QUEST_NO= :vo.questNo , A.PROG_YN= :vo.progYn , A.FILTER_YN= :vo.filterYn
+											,A.AGE_GROUP = :vo.ageGroup , A.MF = :vo.Mf , A.CONTACT_GUBUN = :vo.contactGubun , REGION = :vo.region
+				WHEN NOT MATCHED THEN
+				  INSERT(
+							POLL_IDX
+							,QUEST_NO
+							,PANEL_ID
+							,NEXT_QUEST_NO
+							,FILTER_YN
+							,PROG_YN
+							,AGE_GROUP
+							,MF
+							,CONTACT_GUBUN
+							,REGION
+						) 
+						VALUES (
+							:vo.pollIdx
+							,:vo.questNo
+							,:vo.panelId
+							,:vo.nextQuestNo
+							,:vo.filterYn
+							,:vo.progYn
+							,:vo.ageGroup
+							,:vo.Mf
+							,:vo.contactGubun
+							,:vo.region
+						)
+			]]>
+			</statement>
+		</query>
+		
+		
+		<query id="findQuestTitleByPk" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			SELECT A.*, ROUND(A.QUEST_NO/A.QUEST_COUNT*100,0) AS PROGRESS_BAR
+			FROM(
+				SELECT A.POLL_IDX
+					  , DECODE(FILTER_YN, 'Y','SQ','Q')||A.QUEST_NO AS QUEST_NUMBER
+					  , A.QUEST_NO	AS	QUEST_NO
+					  , A.QUEST_TITLE
+					  , A.QUEST_TYPE
+					  , A.EXAM_TYPE
+					  , A.BRANCH_YN
+					  , A.EXAM_ROTATEYN
+					  , A.GRAPH_TYPE
+					  , A.FILTER_YN
+					  , A.MERGE_TYPE
+					  , A.REG_DATE
+					  , A.REG_ID
+					  , A.MOD_DATE
+					  , A.MOD_ID
+					  , (SELECT FILTER_ANSWER FROM FILTER_MNG WHERE POLL_IDX = :vo.pollIdx AND QUEST_NO = :vo.questNo)	AS	FILTER_ANSWER
+					  , (SELECT COUNT(1) FROM (SELECT B.QUEST_NO FROM POLL_MNG A, QUEST_MNG B WHERE 1=1 AND A.POLL_IDX = B.POLL_IDX AND A.POLL_IDX = :vo.pollIdx))  AS QUEST_COUNT
+					  , (SELECT POLL_BGIMG FROM POLL_MNG WHERE POLL_IDX = A.POLL_IDX) AS POLL_BGIMG
+					  
+					  , B.CHOICE_CNT
+					  , B.CHOICE_RANGE
+					  
+					  , C.POSITION
+					  , C.ORG_FNAME2
+					  , C.SAV_FNAME2
+					  , C.FILE_PATH2
+					  , C.FILE_SIZE2
+				FROM QUEST_MNG A, QUEST_TYPE_MNG B, 
+	              (SELECT POLL_IDX,QUEST_NO
+	                      ,SUBSTR(XMLAGG(XMLELEMENT( X, ',' , POSITION  ) ORDER BY POSITION).EXTRACT('//text()'),2) AS  POSITION
+	                      ,SUBSTR(XMLAGG(XMLELEMENT( X, ',' , ORG_FNAME ) ORDER BY POSITION).EXTRACT('//text()'),2) AS  ORG_FNAME2
+	                      ,SUBSTR(XMLAGG(XMLELEMENT( X, ',' , SAV_FNAME ) ORDER BY POSITION).EXTRACT('//text()'),2) AS  SAV_FNAME2
+	                      ,SUBSTR(XMLAGG(XMLELEMENT( X, ',' , FILE_PATH ) ORDER BY POSITION).EXTRACT('//text()'),2) AS  FILE_PATH2
+	                      ,SUBSTR(XMLAGG(XMLELEMENT( X, ',' , FILE_SIZE ) ORDER BY POSITION).EXTRACT('//text()'),2) AS  FILE_SIZE2
+	                FROM(
+	                    SELECT POLL_IDX,QUEST_NO
+	                           ,POSITION    AS  POSITION 
+	                           ,ORG_FNAME   AS  ORG_FNAME
+	                           ,SAV_FNAME   AS  SAV_FNAME
+	                           ,FILE_PATH   AS  FILE_PATH
+	                           ,FILE_SIZE   AS  FILE_SIZE
+	                    FROM QUEST_ADDFILE
+	                    )
+	              GROUP BY POLL_IDX,QUEST_NO) C
+				WHERE 1=1
+				    AND A.POLL_IDX = B.POLL_IDX(+)
+				    AND A.QUEST_NO = B.QUEST_NO(+)
+				    AND A.POLL_IDX = C.POLL_IDX(+)
+				    AND A.QUEST_NO = C.QUEST_NO(+)
+					AND A.POLL_IDX = :vo.pollIdx
+					AND A.QUEST_NO = :vo.questNo
+			)A
+			
+			]]>
+			</statement>
+			<result class="seoul.research.domain.SurveyWeb" />
+		</query>
+		
+		
+		<query id="findSurveyQuestList" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			WITH A1 AS(
+				SELECT A.POLL_IDX
+					  , DECODE(FILTER_YN, 'Y','SQ','Q')||A.QUEST_NO AS QUEST_NUMBER
+					  , A.QUEST_NO	AS	QUEST_NO
+					  , A.QUEST_TITLE
+					  , A.QUEST_TYPE
+					  , A.EXAM_TYPE
+					  , A.BRANCH_YN
+					  , A.EXAM_ROTATEYN
+					  , A.GRAPH_TYPE
+					  , A.FILTER_YN
+					  , A.MERGE_TYPE
+					  , A.REG_DATE
+					  , A.REG_ID
+					  , A.MOD_DATE
+					  , A.MOD_ID
+					  
+					  , NVL(B.EXAM_NO, 0)  AS  EXAM_NO
+					  , B.EXAM_TITLE
+					  , B.BRANCH_NO
+					  , B.MERGE_TITLE
+					  
+					  , (SELECT FILTER_ANSWER FROM FILTER_MNG WHERE POLL_IDX = :vo.pollIdx AND QUEST_NO = :vo.questNo)	AS	FILTER_ANSWER
+				FROM QUEST_MNG A, EXAMPLE_MNG B
+				WHERE 1=1
+					AND A.POLL_IDX = B.POLL_IDX(+)
+					AND A.QUEST_NO = B.QUEST_NO(+)
+					AND A.POLL_IDX = :vo.pollIdx
+					AND A.QUEST_NO = :vo.questNo
+				
+				#if ($vo.examRotateyn)
+				ORDER BY dbms_random.value
+				#end
+				
+			)
+			SELECT M.*, S.FILE_PATH, S.SAV_FNAME, S.FILE_DESC
+			FROM (SELECT T.*, ROWNUM AS ROWN
+		          FROM (SELECT * FROM A1
+		          WHERE EXAM_NO <> '99'
+				  #if ($vo.examRotateyn)
+				  ORDER BY dbms_random.value
+				  #else
+				  ORDER BY EXAM_NO
+				  #end
+		          ) T
+				
+				UNION ALL
+				
+				SELECT P.*, 99
+				FROM A1 P
+				WHERE EXAM_NO = '99'
+			)M, IMG_MNG S
+			WHERE 1=1
+				AND M.POLL_IDX = S.POLL_IDX(+)
+				AND M.QUEST_NO = S.QUEST_NO(+)
+				AND M.EXAM_NO = S.EXAM_NO(+)
+			ORDER BY M.ROWN
+
+			]]>
+			</statement>
+			<result class="seoul.research.domain.SurveyWeb" />
+		</query>
+		
+		
+		<query id="findQuestExitTitleByPk" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			SELECT *
+			FROM POLL_MNG A
+			WHERE 1=1
+				AND A.POLL_IDX = :vo.pollIdx
+			
+			]]>
+			</statement>
+			<result class="seoul.research.domain.SurveyWeb" />
+		</query>
+		
+		<query id="findQuestPassTitleByPk" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			SELECT *
+			FROM POLL_MNG A
+			WHERE 1=1
+			AND A.POLL_IDX = :vo.pollIdx
+			
+			]]>
+			</statement>
+			<result class="seoul.research.domain.SurveyWeb" />
+		</query>
+		
+		<query id="findSurveyUserChkByPk" isDynamic="true">
+			<statement>
+			<![CDATA[	
+			SELECT COUNT(1) AS PANEL_COUNT
+			FROM PANEL A
+			WHERE 1=1
+			AND A.PNL_ID = :vo.panelId
+			AND DELFLAG = 'N'
+			]]>
+			</statement>
+			<result class="seoul.research.domain.SurveyWeb" />
+		</query>
+		
+	</queries>
+</queryservice>

@@ -1,0 +1,124 @@
+@charset "utf-8";
+
+/* index */
+.index {height:640px; padding-bottom:0;}
+.index .wrap_colLeft {float:left; width:320px; background:url(../img/poll/img_slogan.gif) no-repeat;}
+.index .slogan {overflow:hidden; height:217px; font-size:0; line-height:0; visibility:hidden;}
+.index .postList {position:relative;}
+.index .postList h3 {margin-bottom:14px;}
+.index .postList li {overflow:hidden; padding-left:7px; margin-bottom:3px; background:url(../img/poll/ico_dotGray.gif) no-repeat 0 50%;}
+.index .postList li a {float:left;}
+.index .postList li span {float:right; color:#929292;}
+.index .postList .link_more {position:absolute; top:-2px; right:0; padding-left:8px; background:url(../img/poll/ico_arrOrange.gif) no-repeat 0 5px;}
+.index .notice {margin-bottom:40px;}
+.index .surveyResult {margin-bottom:43px;}
+.index .quickService h3 {margin-bottom:13px;}
+.index .quickService a {display:inline-block;}
+.index .surveyResult .mSearchBox {position:absolute; top:-3px; left:90px; width:157px; height:21px; background:url(../img/poll/img_searchBox.gif) no-repeat;}
+.index .surveyResult .mSearchBox input {border:none; width:115px; height:15px; margin:3px 0 0 10px; font-size:11px;}
+.index .surveyResult .mSearchBox a {position:absolute; right:0; width:30px; height:21px;}
+.index .surveyResult .mSearchBox span {position:relative; z-index:-1;}
+.index .quickService .bnr_faq {margin-left:70px;}
+
+.index .wrap_colRight {float:left; position:relative; width:630px; height:100%; background:url(../img/poll/bg_mainVisual.gif) no-repeat;}
+.index .tab_issue {position:absolute; top:55px; right:0px; z-index:10;}
+.index .issue {position:absolute; top:37px; right:0;}
+.index .issue .blind {display:none;}
+
+.index .seoulSectionLink span {overflow:hidden; position:absolute; width:67px; height:67px; background:no-repeat; text-indent:100%; white-space:nowrap;}
+.index .seoulSectionLink .tit {position:absolute; top:560px; left:296px;}
+.index .seoulSectionLink .link1 span {top:112px; left:83px; background-image:url(../img/poll/btn_welfare.png);}
+.index .seoulSectionLink .link2 span {top:198px; left:61px; background-image:url(../img/poll/btn_woman.png);}
+.index .seoulSectionLink .link3 span {top:283px; left:54px; background-image:url(../img/poll/btn_economy.png);}
+.index .seoulSectionLink .link4 span {top:365px; left:76px; background-image:url(../img/poll/btn_environment.png);}
+.index .seoulSectionLink .link5 span {top:441px; left:117px; background-image:url(../img/poll/btn_culture.png);}
+.index .seoulSectionLink .link6 span {top:502px; left:181px; background-image:url(../img/poll/btn_traffic.png);}
+
+
+/* introJoinPanel */
+.introJoinPanel .spot {background-image:url(../img/poll/img_spot01.gif);}
+.introJoinPanel .txt_joinPanel {margin-bottom:20px;}
+.introJoinPanel .wrap_btnJoin {display:block; padding-bottom:30px; margin-bottom:37px; border-bottom:1px solid #ddd; text-align:center;}
+.introJoinPanel .panelStep li {position:relative; height:62px; padding:23px 0 13px 111px; margin-bottom:15px; background:url(../img/poll/bg_vertStep.gif) no-repeat;}
+.introJoinPanel .panelStep strong {display:block; color:#3b8500;}
+.introJoinPanel .panelStep img {position:absolute; top:11px; left:23px;}
+.introJoinPanel .panelStep .line3 strong {margin-top:-8px;}
+.introJoinPanel .panelStep .stepLst {background-image:url(../img/poll/bg_vertStepLst.gif);}
+/* //introJoinPanel */
+
+/* introSurvey */
+.introSurvey .spot {background-image:url(../img/poll/img_spot02.gif);}
+.introSurvey .panelStep li {position:relative; height:62px; padding:23px 30px 13px 111px; margin-bottom:15px; background:url(../img/poll/bg_vertStep.gif) no-repeat;}
+.introSurvey .panelStep strong {display:block; color:#3b8500;}
+.introSurvey .panelStep img {position:absolute; top:11px; left:23px;}
+.introSurvey .panelStep .line3 strong {margin-top:-8px;}
+.introSurvey .panelStep .stepLst {background-image:url(../img/poll/bg_vertStepLst.gif);}
+/* //introSurvey */
+
+/* onSurvey */
+.onSurvey .spot {background-image:url(../img/poll/img_spot02.gif);}
+/* //onSurvey */
+
+/* surveyResult */
+.surveyResult .spot {background-image:url(../img/poll/img_spot03.gif);}
+/* //surveyResult */
+
+/* jonPanel */
+.jonPanel .spot {background-image:url(../img/poll/img_spot04.gif);}
+.jonPanel .box_joinChk {padding:30px 30px 30px 143px; border:1px solid #ddd; background:#f9f9f9 url(../img/poll/img_joinYes.gif) no-repeat 26px 22px;}
+.jonPanel .box_joinChk strong {display:block; margin-bottom:20px; font-size:14px;}
+.jonPanel .box_joinChk em {font-weight:bold; color:#006bd8;}
+
+.jonPanel .joinNo {background-image:url(../img/poll/img_joinNo.gif);}
+.jonPanel .joinNo .chkBox {margin:15px 0 20px;}
+.jonPanel .joinNo .chkBox input {margin-right:3px; border:none;}
+/* //jonPanel */
+
+/* myMileage */
+.myMileage .spot {background-image:url(../img/poll/img_spot04.gif);}
+/* //myMileage */
+
+/* mySurvey */
+.mySurvey .spot {background-image:url(../img/poll/img_spot04.gif);}
+/* //mySurvey */
+
+/* modifyMyInfo */
+.modifyMyInfo .spot {background-image:url(../img/poll/img_spot04.gif);}
+.modifyMyInfo .btn_modifyMyInfo {display:block; width:184px; margin:20px auto 0;}
+/* //modifyMyInfo */
+
+/* deleteMyInfo */
+.deleteMyInfo .spot {background-image:url(../img/poll/img_spot04.gif);}
+.deleteMyInfo .btn_deleteMyInfo {display:block; width:184px; margin:20px auto 0;}
+/* //deleteMyInfo */
+
+/* notice */
+.notice .spot {background-image:url(../img/poll/img_spot05.gif);}
+/* //notice */
+
+/* faq */
+.faq .spot {background-image:url(../img/poll/img_spot05.gif);}
+/* //faq */
+
+/* qna */
+.qna .spot {background-image:url(../img/poll/img_spot05.gif);}
+/* //qna */
+
+/* sitemap */
+.sitemap .spot {background-image:url(../img/poll/img_spot01.gif);}
+.sitemap .content {width:100%;}
+.sitemap .allMenu {overflow:hidden;}
+.sitemap .allMenu .menu1 {float:left; width:20%;}
+.sitemap .allMenu ul {margin-top:22px;}
+.sitemap .allMenu ul li {padding-left:23px; margin-bottom:5px; background:url(../img/poll/ico_dotGray02.gif) no-repeat 12px 50%;}
+.sitemap .allMenu a:hover {text-decoration:underline;}
+/* //sitemap */
+
+/* popup */
+.pop_wrap {width:750px; height:588px;}
+.pop_head {height:34px; padding:12px 0 0 24px; background:url(../img/poll/bg_popHead.gif) repeat-y;}
+.pop_content {padding:37px 24px;}
+.pop_content .tbl_view a {text-decoration:underline;}
+.pop_content .tbl_view .link_fileDown {font-weight:bold;}
+.pop_content .btn_close {display:block; width:66px; margin:20px auto 0;}
+/* popup */

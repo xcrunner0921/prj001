@@ -1,0 +1,96 @@
+@charset "utf-8"; 
+
+body{background:url(../img/admincenter/bg_left.gif) repeat-y 0 0}
+
+#header h1{position:absolute; top:10px; left:20px}
+#header p{text-align:right; padding-top:26px; padding-bottom:17px; line-height:20px}
+
+/* gnb */
+.gnb{}
+.gnb ul{}
+.gnb ul li{float:left; width:189px; text-align:center; border-right:1px solid #4da0e0}
+.gnb ul li a{display:block; height:36px; line-height:36px; color:#fff; font-weight:bold}
+
+#sidebar .inner{padding:16px 20px 20px}
+#sidebar h2{background:url(../img/admincenter/blt_blue.jpg) no-repeat 0 13px; color:#191a1c; font-size:14px; line-height:40px; padding:0 20px 6px}
+#sidebar ul{background:url(../img/admincenter/line_sidebar.gif) repeat-x 100% 0; padding:20px 0}
+#sidebar ul li{background:url(../img/admincenter/blt_plus.gif) no-repeat 10px 50%; padding-left:25px; margin-bottom:10px}
+#sidebar ul li a{color:#333}
+#sidebar ul li .active, #sidebar ul li a:focus, #sidebar ul li a:active, #sidebar ul li a:hover{text-decoration:underline}
+
+#contents h2{border-bottom:3px solid #eee; color:#191a1c; font-size:14px; line-height:35px; margin-bottom:20px; padding-bottom:6px}
+
+#contents table{width:100%; color:#000; font-size:12px; border-width:2px 0 0 1px; border-style:solid; margin-bottom:20px}
+#contents table th, #contents table td{border-width:0 1px 1px 0; border-style:solid; padding:5px;line-height:13px}
+.survey .srch_tbl{border-color:#639e3a}
+.survey .srch_tbl th, .survey .srch_tbl td{border-color:#639e3a; text-align:left}
+.survey .srch_tbl th{background-color:#e7f2d5}
+
+.survey .list_tbl{border-color:#609fd0}
+.survey .list_tbl th, .survey .list_tbl td{border-color:#609fd0}
+.survey .list_tbl th{background-color:#e7f0f9}
+.survey .list_tbl td{text-align:center}
+.survey .list_tbl td a{text-decoration:underline}
+
+.survey .red{letter-spacing:5px}
+.survey .edit .red{letter-spacing:5px; margin-left:-12px}
+.survey .edit th.letter2{letter-spacing:24px}
+.survey .edit th.letter3{letter-spacing:6px}
+#contents.survey .edit th{text-align:left; padding-left:20px!important; line-height:18px}
+#contents.survey .edit td{text-align:left; line-height:18px}
+
+.survey .total{color:#444;padding-top:5px}
+.survey .sec{padding-bottom:0px!important}
+.survey .sec div{width:35%; float:left}
+.survey .sec >div:first-child{width:26%}
+.survey .sec >span >div:first-child{width:26%}
+.survey .sec input{margin-bottom:5px}
+.survey .sec .half{width:50%!important}
+.survey .sec .third{width:26%}
+.survey .sec .twothird{width:52%}
+/* 2013.09.23 추가 */
+.survey .sec .colRight {float:left; width:74%;}
+.survey .sec .colRight div {width:50%;}
+/* //2013.09.23 추가 */
+
+.survey .sec02{padding-bottom:0px!important}
+.survey .sec02 div{margin-bottom:5px}
+
+.querst h3{color:#0077d3; font-size:12px; margin-bottom:20px}
+.querst .detail{border-top:2px solid #609fd0; border-bottom:1px solid #609fd0; padding-top:30px; margin-bottom:16px}
+.querst .inner p{margin-bottom:10px}
+.querst .sec{margin-bottom:38px}
+.querst .sec label{width:28%; display:inline-block; padding:2px 15px}
+.querst  .detail .inner{position:relative}
+.querst  .detail .inner p{padding-left:20px;font-weight:bold}
+.querst  .detail .inner p .num{position:absolute;top:2px;left:0;width:20px;}
+
+.survey .sec .thumb{float:right; margin-right:5px; width:110px; height:46px; border:1px solid #ccc}
+.survey .thumb1{width:60px; height:30px; border:1px solid #ccc; display:inline-block; margin-bottom:5px}
+.survey .last .thumb1{margin:0px}
+.survey .thumb1 img{width:100%}
+.survey .second{margin-left:32px}
+.survey .sec .thumb img{width:100%; margin:0 auto}
+.survey .sec .clear{clear:both; width:100%; margin:5px 0}
+.survey .sec .clear input{margin:0}
+.survey .sec .video{margin:5px}
+
+.inner .img_wrap{margin:0 15px 38px;:}
+.inner .img_wrap label{display:block;margin-bottom:5px;}
+.inner .img_wrap img{display:block;margin:0 0 15px;}
+
+#contents .noborder{border:0;margin:0 15px 30px;width:95%}
+#contents .noborder td{border:0;vertical-align:top;padding:5px 1px}
+#contents .noborder td input{margin-right:0;}
+
+.num{position}
+
+.ip80{width:80px}
+.ip50{width:50px}
+.ip120{width:120px}
+.ip150{width:150px}
+.ip160{width:160px}
+
+.ip60{width:60%}
+.ip80p{width:80%}
+.ip100{width:100%; *width:98%}

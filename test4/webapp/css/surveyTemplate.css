@@ -1,0 +1,123 @@
+@charset "utf-8";
+
+/* reset */
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,form,fieldset,legend,textarea,p,input,select,textarea,button {margin:0; padding:0;}
+fieldset,img {border:0 none;}
+dl,ul,ol,li {list-style:none;}
+input,select,textarea,button,img {vertical-align:middle;}
+button {border:0 none; background-color:transparent; cursor:pointer;}
+body,th,td,input,select,textarea,button {font-size:12px; line-height:1.7em; font-family:'돋움',dotum,sans-serif;}
+a {text-decoration:none;}
+em {font-style:normal; font-weight:normal;}
+textarea {overflow-y:scroll; margin:10px 0; border:1px solid #b7b7b7;}
+/* //reset */
+
+/* common */
+.popup_wrap {width:750px;}
+.popup_header {position:relative;}
+.popup_content {width:702px;}
+.question {position:relative; height:64px; padding:12px 45px 0 0; font-size:14px; font-weight:bold; color:#fff;}
+.question span {position:absolute; left:0; width:60px; text-align:center; color:#f6ff00;}
+.answer {overflow-y:auto;}
+
+.a2List li {width:600px; margin-bottom:15px;}
+.a4List li {width:600px; margin-bottom:15px;}
+.aLank {margin:0 0 30px 190px;}
+.aLank li {overflow:hidden; margin-bottom:5px;}
+.aLank em {float:left; margin-right:13px;}
+.aLank span {display:block; float:left; width:200px; border-bottom:1px solid #b7b7b7;}
+.imgSelect {overflow-y:auto;}
+.imgSelect img {margin-top:10px;}
+.relationImg {overflow-y:auto;}
+.relationImg div {margin-bottom:15px; text-align:center;}
+
+.surveyInfo em {font-weight:bold;}
+.inputAlgC {display:block; width:324px; margin:0 auto;}
+
+.endCopy {font-size:16px; font-weight:bold; }
+.endCopy span {display:block; margin-bottom:5px;}
+.endSurvey {height:157px; padding:27px 27px 0 28px;}
+.endSurvey dt {font-weight:bold; }
+.endSurvey em {font-size:14px; font-weight:bold;}
+
+.progress {position:absolute; top:26px; right:24px; width:163px; height:34px; background:url(../img/poll/img_progressBar.png) no-repeat;}
+.progress .bar {position:absolute; top:13px; left:0; width:100%; height:10px;}
+.progress .bar img {float:left; height:10px;}
+/*.progress .bar2 {width:35%;}  width 값에 따라 바의 길이가 변함. 93%가 최대 */ /* jsp로 가져감 201310174 pjh*/
+/*.progress span {position:absolute; top:21px; left:35%; font-size:11px; color:#fd6c01;}  left 값을 .bar2의 width 값과 동일하게 적용시키면 됨 *//* jsp로 가져감 201310174 pjh*/
+/* //common */
+
+/* type1 */
+.type1 {height:588px; background:url(../img/poll/bg_surveyTemplate01.gif) no-repeat 70% 100%;}
+.type1 .popup_header {padding:19px 0 31px 24px;}
+.type1 .popup_content {position:relative; height:404px; padding-top:28px; margin-left:24px; background:url(../img/poll/bg_surveyBox01.gif) no-repeat;}
+.type1 .txtWrap {padding:0 25px;}
+.type1 .question {height:52px; padding:7px 0 0 68px; margin-bottom:34px; color:#005fb8;}
+.type1 .question span {display:block; top:0; width:52px; height:37px; padding-top:15px; background:url(../img/poll/img_wordBalloon.gif) no-repeat; color:#fff;}
+.type1 .answer {height:222px;}
+.type1 .btnWrap {position:absolute; bottom:34px; width:679px; text-align:center;}
+
+.type1 .bg2 {background-image:url(../img/poll/bg_surveyBox0102.gif);}
+.type1 .surveyInfo {height:191px; padding:27px 28px 90px; background-color:#f4fbff;}
+.type1 .surveyInfo li {padding:0 0 12px 22px; margin-bottom:12px; border-bottom:1px solid #cce0f2; background:url(../img/poll/ico_arrBlue03.gif) no-repeat 0 4px;}
+.type1 .surveyInfo .tit {font-size:14px; font-weight:bold; color:#005fb8;}
+.type1 .surveyInfo .tit em {font-size:12px; color:#000;}
+
+.type1 .endCopy {height:52px; padding-left:70px; padding-top:22px; margin:0 0 50px 0; background:url(../img/poll/img_graph02.gif) no-repeat 135px 16px; text-align:center;}
+.type1 .endCopy span {color:#5f5f5f;}
+.type1 .endSurvey {width:598px; background-color:#f4fbff;}
+.type1 .endSurvey dt {padding:0 0 13px 20px; background:url(../img/poll/ico_arrBlue03.gif) no-repeat 0 4px;}
+.type1 .endSurvey em { color:#005fb8;}
+.type1 .endSurvey dd {padding:19px 20px 0 20px; border-top:1px solid #d9d9d9;}
+
+.type1 .aLank span {color:#005fb8;}
+/* //type1 */
+
+/* type2 */
+.type2 {height:569px; background:#f5f5f5 url(../img/poll/bg_surveyTemplate02.gif) no-repeat 100% 100%;}
+.type2 .popup_header {padding:19px 0 31px 24px;}
+.type2 .popup_content {height:430px; margin-left:24px; background:url(../img/poll/bg_surveyBox02.png) no-repeat;}
+.type2 .txtWrap {height:333px;}
+.type2 .question {top:-1px; padding-left:88px; background:url(../img/poll/bg_question02.png) no-repeat;}
+.type2 .question span {top:0; height:64px; line-height:64px;}
+.type2 .answer {height:230px; padding:20px 0 0 25px; margin-right:20px;}
+.type2 .btnWrap {padding-top:25px; text-align:center;}
+
+.type2 .surveyInfo {padding:40px 0 90px; margin:0 30px 0; border-bottom:1px solid #e6e6e6;}
+.type2 .surveyInfo li {height:28px; padding:12px 0 0 50px; background:url(../img/poll/ico_arrGreen.png) no-repeat 30px 15px;}
+.type2 .surveyInfo .tit {font-size:14px; font-weight:bold; background-color:#ececec; color:#418b00;}
+.type2 .surveyInfo .tit em {font-size:12px; color:#000;}
+
+.type2 .endCopy {height:52px; padding-left:70px; padding-top:50px; margin:0 0 50px 160px; background:url(../img/poll/img_graph.gif) no-repeat 0 43px;}
+.type2 .endCopy span {color:#5f5f5f;}
+.type2 .endSurvey {width:598px; margin-left:25px; background-color:#f4f4f4;}
+.type2 .endSurvey dt {padding:0 0 13px 20px; background:url(../img/poll/ico_arrGreen.png) no-repeat 0 4px;}
+.type2 .endSurvey em { color:#418b00;}
+.type2 .endSurvey dd {padding:19px 20px 0 20px; border-top:1px solid #d9d9d9;}
+
+/* //type2 */
+
+/* type3 */
+.type3 {height:588px;}
+.type3 .popup_header {height:67px; padding:19px 0 0 25px; background:url(../img/poll/bg_header03.gif) no-repeat;}
+.type3 .popup_content {position:relative; width:679px; height:470px; padding:34px 36px 0 35px; background:url(../img/poll/bg_surveyTemplate03.gif) no-repeat;}
+.type3 .txtWrap {height:309px;}
+.type3 .question {width:556px; padding-left:78px; background:url(../img/poll/bg_question03.png) no-repeat;}
+.type3 .question span {height:37px; border-right:1px solid #0762b6; line-height:37px;}
+.type3 .answer {height:233px; margin-top:16px;}
+.type3 .btnWrap {position:absolute; bottom:34px; width:679px; text-align:center;}
+
+.type3 .surveyInfo {position:relative; top:93px; height:180px; padding:29px 46px 0 30px; border:1px solid #d3d3d3; background-color:#fff;}
+.type3 .surveyInfo li {padding-left:18px; margin-bottom:15px; background:url(../img/poll/ico_checkOrange.gif) no-repeat 0 3px;}
+.type3 .surveyInfo em {color:#0069d5;}
+.type3 .surveyInfo .tit {position:absolute; top:-94px; left:0px; width:571px; height:76px; padding:22px 0 0 108px; font-size:14px; font-weight:bold; background:url(../img/poll/bg_question03.png) no-repeat; color:#fff;}
+.type3 .surveyInfo .tit em {position:absolute; top:14px; left:0; width:90px; height:37px; border-right:1px solid #0762b6; line-height:37px; color:#fff728; text-align:center;}
+
+.type3 .endCopy {height:87px; padding:28px 0 0 49px;background:url(../img/poll/bg_endCopyBOx.png) no-repeat; color:#fff; text-align:center;}
+.type3 .endSurvey {margin-top:24px; border:1px solid #d3d3d3; background-color:#fff;}
+.type3 .endSurvey dt {padding-left:18px; margin-bottom:24px; background:url(../img/poll/ico_checkOrange.gif) no-repeat 0 3px;}
+.type3 .endSurvey em {font-size:14px; color:#0069d5;}
+.type3 .endSurvey dd {padding-left:18px;}
+
+.type3 .aLank span {color:#007ece;}
+/* //type3 */

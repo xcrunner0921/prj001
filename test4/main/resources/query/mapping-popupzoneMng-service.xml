@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+	
+		<query id="createPopupzoneAddfile">
+			<statement>
+			<![CDATA[
+				INSERT INTO POP_MNG (
+					  S_NO
+					, TITLE
+					, STR_DATE
+					, END_DATE
+					, LINK_URL
+					, PORDER
+					, PDESC
+					, FILE_PATH
+					, ORG_FNAME
+					, SAV_FNAME
+					, FILE_SIZE
+					, REG_DATE
+					, REG_ID
+					, MOD_DATE
+					, MOD_ID
+				) 
+				VALUES (
+					NVL((SELECT MAX(NVL(S_NO,0)) + 1 FROM POP_MNG), 1)
+					, :vo.title
+					, :vo.strDate
+					, :vo.endDate
+					, :vo.linkUrl
+					, :vo.porder
+					, :vo.pdesc
+					, :vo.filePath
+					, :vo.orgFname
+					, :vo.savFname
+					, :vo.fileSize
+					, sysdate
+					, :vo.regId
+					, sysdate
+					, :vo.modId
+				)
+			]]>
+			</statement>
+		</query>
+		
+		<query id="findDetailPopupzoneByPk" isDynamic="true">
+			<statement>
+			<![CDATA[
+				SELECT S_NO
+						,TITLE
+						,STR_DATE
+						,TO_CHAR(STR_DATE, 'YYYY-MM-DD') 		AS	STR_DATE_YMD
+						,TO_CHAR(STR_DATE, 'HH24') 				AS	STR_DATE_HOUR
+						,TO_CHAR(STR_DATE, 'MI') 				AS	STR_DATE_MINUTE
+						,END_DATE
+						,TO_CHAR(END_DATE, 'YYYY-MM-DD') 		AS	END_DATE_YMD
+						,TO_CHAR(END_DATE, 'HH24') 				AS	END_DATE_HOUR
+						,TO_CHAR(END_DATE, 'MI') 				AS	END_DATE_MINUTE
+						,LINK_URL
+						,PORDER
+						,PDESC
+						,FILE_PATH
+						,ORG_FNAME
+						,SAV_FNAME
+						,FILE_SIZE
+						,REG_DATE
+						,REG_ID
+						,MOD_DATE
+						,MOD_ID
+				FROM POP_MNG
+				WHERE 1=1
+				AND S_NO = :vo.sNo
+				ORDER BY PORDER
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PopupMng" />
+		</query>
+		
+		<query id="findPopupzoneMngList" isDynamic="true">
+			<statement>
+			<![CDATA[	
+				SELECT S_NO
+						,TITLE
+						,STR_DATE
+						,TO_CHAR(STR_DATE, 'YYYY-MM-DD') 		AS	STR_DATE_YMD
+						,TO_CHAR(STR_DATE, 'HH24') 				AS	STR_DATE_HOUR
+						,TO_CHAR(STR_DATE, 'MI') 				AS	STR_DATE_MINUTE
+						,END_DATE
+						,TO_CHAR(END_DATE, 'YYYY-MM-DD') 		AS	END_DATE_YMD
+						,TO_CHAR(END_DATE, 'HH24') 				AS	END_DATE_HOUR
+						,TO_CHAR(END_DATE, 'MI') 				AS	END_DATE_MINUTE
+						,LINK_URL
+						,PORDER
+						,PDESC
+						,FILE_PATH
+						,ORG_FNAME
+						,SAV_FNAME
+						,FILE_SIZE
+						,REG_DATE
+						,REG_ID
+						,MOD_DATE
+						,MOD_ID
+				FROM POP_MNG
+				WHERE 1=1
+				#if ($vo.searchTitle)
+					AND TITLE LIKE '%' || :vo.searchTitle || '%'
+				#end
+				
+				/*AND TO_CHAR(STR_DATE, 'YYYY-MM-DD-hh24-mi') <= (SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD-hh24-mi') FROM DUAL)
+				AND TO_CHAR(END_DATE, 'YYYY-MM-DD-hh24-mi') >= (SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD-hh24-mi') FROM DUAL)*/
+				ORDER BY PORDER
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PopupMng" />
+		</query>
+		
+		
+		<query id="findPorderList" isDynamic="true">
+			<statement>
+			<![CDATA[	
+				SELECT PORDER FROM POP_MNG
+				WHERE 1=1
+					AND PORDER < 5
+					/*
+					AND TO_CHAR(STR_DATE, 'YYYY-MM-DD-hh24-mi') <= (SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD-hh24-mi') FROM DUAL)
+					AND TO_CHAR(END_DATE, 'YYYY-MM-DD-hh24-mi') >= (SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD-hh24-mi') FROM DUAL) */
+				ORDER BY PORDER
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PopupMng" />
+		</query>
+		
+		<query id="updatePopupMngPlus">
+			<statement>
+			<![CDATA[
+				UPDATE POP_MNG
+				SET PORDER = (SELECT PORDER + 1 FROM POP_MNG WHERE PORDER = :vo.porder)
+				WHERE PORDER = :vo.porder
+				AND TO_CHAR(STR_DATE, 'YYYY-MM-DD-hh24-mi') <= (SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD-hh24-mi') FROM DUAL)
+				AND TO_CHAR(END_DATE, 'YYYY-MM-DD-hh24-mi') >= (SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD-hh24-mi') FROM DUAL)
+			]]>
+			</statement>
+		</query>
+		<query id="updatePopupMngMinus">
+			<statement>
+			<![CDATA[
+				UPDATE POP_MNG
+				SET PORDER = (SELECT PORDER - 1 FROM POP_MNG WHERE PORDER = :vo.porder)
+				WHERE PORDER = :vo.porder
+				AND TO_CHAR(STR_DATE, 'YYYY-MM-DD-hh24-mi') <= (SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD-hh24-mi') FROM DUAL)
+				AND TO_CHAR(END_DATE, 'YYYY-MM-DD-hh24-mi') >= (SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD-hh24-mi') FROM DUAL)
+			]]>
+			</statement>
+		</query>
+		
+		<query id="updatePopupMng">
+			<statement>
+			<![CDATA[
+				UPDATE POP_MNG
+				SET TITLE = :vo.title
+					,	STR_DATE = :vo.strDate
+					,	END_DATE = :vo.endDate
+					,	LINK_URL = :vo.linkUrl
+					,	PORDER = :vo.porder
+					,	PDESC = :vo.pdesc
+					#if ($vo.filePath)
+					,	FILE_PATH = :vo.filePath
+					,	ORG_FNAME = :vo.orgFname
+					,	SAV_FNAME = :vo.savFname
+					,	FILE_SIZE = :vo.fileSize
+					#end
+					,	MOD_DATE = sysdate
+					,	MOD_ID = :vo.modId
+				WHERE S_NO = :vo.sNo
+			]]>
+			</statement>
+		</query>
+		
+		<query id="removePopupMng">
+			<statement>
+			<![CDATA[
+				DELETE POP_MNG
+				WHERE S_NO = :vo.sNo
+			]]>
+			</statement>
+		</query>
+		
+		<query id="updatePopupMngFirst" isDynamic="true">
+			<statement>
+			<![CDATA[
+				UPDATE POP_MNG
+				SET PORDER = (PORDER + 1)
+					, MOD_DATE = SYSDATE
+					, MOD_ID = :vo.modId
+			]]>
+			</statement>
+		</query>
+		<query id="updatePopupMngMid" isDynamic="true">
+			<statement>
+			<![CDATA[
+				UPDATE POP_MNG
+				SET PORDER = (PORDER + 1)
+					, MOD_DATE = SYSDATE
+					, MOD_ID = :vo.modId
+				WHERE PORDER >= :vo.porder
+			]]>
+			</statement>
+		</query>
+		
+		<query id="createPopupzone">
+			<statement>
+			<![CDATA[
+				INSERT INTO POP_MNG (
+					  S_NO
+					, TITLE
+					, STR_DATE
+					, END_DATE
+					, LINK_URL
+					, PORDER
+					, PDESC
+					, FILE_PATH
+					, ORG_FNAME
+					, SAV_FNAME
+					, FILE_SIZE
+					, REG_DATE
+					, REG_ID
+					, MOD_DATE
+					, MOD_ID
+				) 
+				VALUES (
+					NVL((SELECT MAX(NVL(S_NO,0)) + 1 FROM POP_MNG), 1)
+					, :vo.title
+					, :vo.strDate
+					, :vo.endDate
+					, :vo.linkUrl
+					, :vo.porder
+					, :vo.pdesc
+					, :vo.filePath
+					, :vo.orgFname
+					, :vo.savFname
+					, :vo.fileSize
+					, sysdate
+					, :vo.regId
+					, sysdate
+					, :vo.modId
+				)
+			]]>
+			</statement>
+		</query>
+		
+		<!-- 1->2로 변경 -->
+		<query id="updatePopmngPorderToLarge" isDynamic="true">
+			<statement>
+			<![CDATA[
+				UPDATE POP_MNG
+				SET PORDER = (PORDER - 1)
+					, MOD_DATE = SYSDATE
+					, MOD_ID = :vo.modId
+				WHERE S_NO <> :vo.sNo
+					AND PORDER <= :vo.porder
+			]]>
+			</statement>
+		</query>
+		
+		<!-- 4->2로 변경 -->
+		<query id="updatePopmngPorderToSmall" isDynamic="true">
+			<statement>
+			<![CDATA[
+				UPDATE POP_MNG
+				SET PORDER = (PORDER + 1)
+					, MOD_DATE = SYSDATE
+					, MOD_ID = :vo.modId
+				WHERE S_NO <> :vo.sNo
+					AND PORDER >= :vo.porder AND PORDER <= :vo.beforePorder
+			]]>
+			</statement>
+		</query>
+		
+		<!-- main : popupzone -->
+		<query id="findPopupzoneMngMainList" isDynamic="true">
+			<statement>
+			<![CDATA[	
+				SELECT A.TITLE , A.STR_DATE, A.END_DATE, A.LINK_URL , A.PORDER
+				    , A.FILE_PATH , A.SAV_FNAME
+				 FROM POP_MNG A
+				WHERE 1=1
+				    AND A.END_DATE >= SYSDATE
+				    AND A.PORDER < 5
+				ORDER BY PORDER    
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PopupMng" />
+		</query>
+	</queries>
+</queryservice>

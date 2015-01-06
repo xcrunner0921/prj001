@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dynamic-hibernate>
+	<query name="findProductList">
+		<![CDATA[
+		SELECT product FROM Product product
+		WHERE 1 = 1
+			#if($prodNo)
+				AND product.prodNo like :prodNo 
+			#else
+				AND product.prodName like :prodName 
+			#end
+			#if ($asYn)
+				AND product.asYn = :asYn 
+			#end					
+		ORDER BY product.prodNo desc
+		]]>
+	</query>
+	
+	<query name="countProductList">
+		<![CDATA[
+		SELECT count(*)
+		FROM Product product 
+		WHERE 1 = 1
+			#if($prodNo)
+				AND product.prodNo like :prodNo 
+			#else
+				AND product.prodName like :prodName 
+			#end
+			#if ($asYn)
+				AND product.asYn = :asYn 
+			#end					
+		]]>
+	</query>	
+</dynamic-hibernate>

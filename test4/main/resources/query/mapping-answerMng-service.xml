@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+		<query id="findPollMng3List" isDynamic="true">
+			<statement>
+			<![CDATA[
+				SELECT *
+				FROM (
+					SELECT POLL_IDX,
+					       (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_FIELD) POLL_FIELD_NAME,
+					       (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_ASK) POLL_ASK_NAME,
+					       POLL_TITLE, POLL_TERMSTART, POLL_TERMEND, POLL_SAMPLE,
+					       CASE WHEN POLL_TERMSTART > SYSDATE THEN 'S'
+					       		WHEN POLL_STOPYN = 'Y' THEN 'T'
+					            WHEN POLL_STOPCOND = '1' THEN
+					                 CASE WHEN POLL_TERMSTART <= SYSDATE AND POLL_TERMEND >= SYSDATE THEN 'P'
+					                      ELSE 'C'
+					                 END
+					            WHEN POLL_STOPCOND = '2' THEN
+					                 CASE WHEN POLL_SAMPLE > (SELECT COUNT(*) FROM PANEL_STATE WHERE POLL_IDX = PM.POLL_IDX AND FILTER_YN = 'Y' AND PROG_YN = 'Y') THEN 'P'
+					                      ELSE 'C'
+					                 END
+					       END POLL_STOP,
+					       REG_DATE,
+					       POLL_ASK
+					FROM POLL_MNG PM
+				  	WHERE POLL_GUBUN = 'LL101'
+				)
+				WHERE POLL_STOP <> 'S'
+				#if ($vo.searchRegDatestart) 
+				  AND TO_CHAR(REG_DATE, 'YYYY-MM-DD') >= :vo.searchRegDatestart
+				#end  
+				#if ($vo.searchRegDateend) 
+				  AND TO_CHAR(REG_DATE, 'YYYY-MM-DD') <= :vo.searchRegDateend
+				#end  
+				#if ($vo.searchPollStop != "")
+				  AND POLL_STOP = :vo.searchPollStop
+				#end
+				#if ($vo.searchPollAsk != "")
+				  AND POLL_ASK = :vo.searchPollAsk
+				#end
+				#if ($vo.searchPollFieldName)
+				  AND POLL_FIELD_NAME LIKE '%' || :vo.searchPollFieldName || '%'
+				#elseif ($vo.searchPollTitle)
+				  AND POLL_TITLE LIKE '%' || :vo.searchPollTitle || '%'
+				#end
+				ORDER BY POLL_TERMSTART DESC
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PollMng" />
+		</query>
+	</queries>
+</queryservice>

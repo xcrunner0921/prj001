@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+						http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<!-- WebApplicationContext에는 stereo type이 Controller인 (@Contoller이 붙은) Bean 만 등록  -->
+	<context:component-scan base-package="com.sds.emp" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<context:component-scan base-package="seoul.research" />
+
+	<!--  Tiles Definition  -->
+	<bean id="tilesViewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView" />
+		<property name="order" value="2" />
+	</bean>
+
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+		<property name="definitions">
+			<list>
+				<value>/WEB-INF/tiles-def.xml</value>
+			</list>
+		</property>
+		<property name="preparerFactoryClass" value="org.springframework.web.servlet.view.tiles2.SpringBeanPreparerFactory" />
+	</bean>
+
+	<!-- Bean Name URL Handler mapping definition for "/welcome.do" -->
+	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+		<property name="interceptors" ref="loginInterceptor" />
+	</bean>
+
+	<!-- Enables plain Controllers -->
+	<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
+
+	<!-- Annotation handler mapping definition-->
+	<bean id="annotationHandlerMapping" class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+		<property name="order" value="1" />
+		<property name="interceptors" ref="loginInterceptor" />
+	</bean>
+
+	<!-- Enables annotated POJO @Controllers -->
+	<bean id="annotationHandlerAdaptor" class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="synchronizeOnSession" value="true" />
+	</bean>
+
+	<!--
+		특정URL에만 Interceptor를 적용하기 위해 사용 ※ 참고 http://www.scottmurphy.info/spring_framework_annotation_based_controller_interceptors
+	-->
+	<bean id="selectedAnnotationHandlerMapping" class="org.springplugins.web.SelectedAnnotationHandlerMapping">
+		<property name="order" value="0" />
+		<property name="urls">
+			<list>
+				<value>/updateCategory.do</value>
+			</list>
+		</property>
+		<property name="interceptors">
+			<list>
+				<ref bean="authorizationInterceptor" />
+			</list>
+		</property>
+	</bean>
+
+	<!--  Interceptor Definition  -->
+	<bean id="loginInterceptor" class="com.sds.emp.common.web.interceptor.LoginInterceptor" />
+
+	<bean id="authorizationInterceptor" class="com.sds.emp.common.web.interceptor.AuthorizationInterceptor">
+		<property name="permissions">
+			<props>
+				<prop key="/updateCategory.do">ROLE_ADMIN</prop>
+			</props>
+		</property>
+		<property name="defaultPermission" value="*" />
+	</bean>
+
+	<!-- multipart resolver -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize">
+			<value>104857600</value>
+		</property>
+	</bean>
+
+	<!-- locale resolver -->
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+	</bean>
+
+	<!-- exception resolver -->
+	<bean id="exceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="defaultErrorView" value="error" />
+		<property name="exceptionMappings">
+			<props>
+				<prop key="com.sds.emp.common.AuthenticationException">
+					login_error
+				</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- excel resolver -->
+	<bean id="excelResolver" class="org.springframework.web.servlet.view.BeanNameViewResolver">
+		<property name="order" value="1" />
+	</bean>
+
+	<bean name="excelApplMngView" class="seoul.research.admincenter.web.ExcelApplMngView" />
+	<bean name="excelPanelMngView" class="seoul.research.admincenter.web.ExcelPanelMngView" />
+
+	<bean name="/welcome.do" class="anyframe.web.springmvc.controller.ForwardController">
+		<property name="viewName" value="welcome" />
+	</bean>
+</beans>

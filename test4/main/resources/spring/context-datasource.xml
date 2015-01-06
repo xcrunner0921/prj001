@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">  	
+  	<!-- 개발서버 : 오라클 11g 시작  -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="net.sf.log4jdbc.DriverSpy"/>
+        <property name="url" value="jdbc:log4jdbc:oracle:thin:@127.0.0.1:1521:ORCL"/>
+        <property name="username" value="spoll"/>
+        <property name="password" value="SPOLL"/>
+        <!-- <property name="url" value="jdbc:log4jdbc:oracle:thin:@98.0.207.87:1521:ORCL"/>-->
+        <!-- <property name="defaultAutoCommit" value="false"/> -->
+    </bean>	
+    <!-- 개발서버 : 오라클 11g 끝  -->
+    
+    
+    <!-- 운영서버 : 오라클 11g 시작  
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="net.sf.log4jdbc.DriverSpy"/>
+        <property name="url" value="jdbc:log4jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=ON)(FAILOVER=ON)(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.160.160)(PORT=1521))(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.160.170)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=PRIDB01)(failover_mode=(type=session)(method=basic))))"/>
+        <property name="username" value="research"/>
+        <property name="password" value="sch!201306"/>
+    </bean>	
+     개발서버 : 오라클 11g 끝  -->
+    
+    <!-- DataSource for ID GenerationService -->
+<!--     <bean id="dataSourceForIdGen" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"> -->
+<!--         <property name="driverClassName" value="net.sf.log4jdbc.DriverSpy"/> -->
+<!--         <property name="url" value="jdbc:log4jdbc:hsqldb:hsql://localhost/sampledb"/> -->
+<!--         <property name="username" value="sa"/> -->
+<!--         <property name="password" value=""/> -->
+<!--         <property name="defaultAutoCommit" value="false"/> -->
+<!--     </bean> -->
+	<bean id="dataSourceForIdGen" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="net.sf.log4jdbc.DriverSpy"/>
+        <property name="url" value="jdbc:log4jdbc:oracle:thin:@127.0.0.1:1521:ORCL"/>
+        <property name="username" value="spoll"/>
+        <property name="password" value="SPOLL"/>
+        <property name="defaultAutoCommit" value="false"/>
+    </bean>
+    
+    <!--  Using JNDI of JEUS 
+    <bean  id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+   		<property name="jndiName" value="STMRDS"/>
+  		<property name="jndiTemplate" ref="jnditemplate"/>
+	</bean>
+
+	<bean id="jndiTemplate" class="org.springframework.jndi.JndiTemplate" >
+   		<property name="environment">
+      		<props>
+         		<prop key="java.naming.factory.initial">jeus.jndi.JNSContextFactory</prop>
+         		<prop key="java.naming.provider.url">107.108.150.108:9736</prop>
+      		</props>
+   		</property>
+	</bean>
+    -->
+</beans>

@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+		<query id="findPollMngList" isDynamic="true">
+			<statement>
+			<![CDATA[
+				SELECT *
+				FROM (
+					SELECT POLL_IDX,
+					       (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_FIELD) POLL_FIELD_NAME,
+					       (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_ASK) POLL_ASK_NAME,
+					       POLL_TITLE, POLL_TERMSTART, POLL_TERMEND, POLL_SAMPLE,
+					       CASE WHEN POLL_TERMSTART > SYSDATE THEN 'S'
+					       		WHEN POLL_STOPYN = 'Y' THEN 'T'
+					            WHEN POLL_STOPCOND = '1' THEN
+					                 CASE WHEN POLL_TERMSTART <= SYSDATE AND POLL_TERMEND >= SYSDATE THEN 'P'
+					                      ELSE 'C'
+					                 END
+					            WHEN POLL_STOPCOND = '2' THEN
+					                 CASE WHEN POLL_SAMPLE > (SELECT COUNT(*) FROM PANEL_STATE WHERE POLL_IDX = PM.POLL_IDX AND FILTER_YN = 'Y' AND PROG_YN = 'Y') THEN 'P'
+					                      ELSE 'C'
+					                 END
+					       END POLL_STOP,
+					       REG_DATE,
+					       POLL_ASK
+					FROM POLL_MNG PM
+				  	WHERE POLL_GUBUN = 'LL101'
+				)
+				WHERE 1 = 1
+				#if ($vo.searchRegDatestart) 
+				  AND TO_CHAR(REG_DATE, 'YYYY-MM-DD') >= :vo.searchRegDatestart
+				#end  
+				#if ($vo.searchRegDateend) 
+				  AND TO_CHAR(REG_DATE, 'YYYY-MM-DD') <= :vo.searchRegDateend
+				#end  
+				#if ($vo.searchPollStop != "")
+				  AND POLL_STOP = :vo.searchPollStop
+				#end
+				#if ($vo.searchPollAsk != "")
+				  AND INSTR(POLL_ASK, :vo.searchPollAsk) <> 0
+				#end
+				#if ($vo.searchPollFieldName)
+				  AND POLL_FIELD_NAME LIKE '%' || :vo.searchPollFieldName || '%'
+				#elseif ($vo.searchPollTitle)
+				  AND POLL_TITLE LIKE '%' || :vo.searchPollTitle || '%'
+				#end
+				ORDER BY POLL_TERMSTART DESC
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PollMng" />
+		</query>
+
+		<query id="createPollMng">
+			<statement>
+			<![CDATA[
+				INSERT INTO POLL_MNG (
+					POLL_IDX,
+					POLL_FIELD, POLL_ASK, POLL_DEPARTMENT, POLL_TITLE, POLL_TERMSTART,
+					POLL_TERMEND, POLL_TARGET, POLL_SAMPLE, POLL_COMPANY, POLL_METHOD,
+					POLL_CONTENTS, POLL_KEYWORD, POLL_OPEN, POLL_GRADE, POLL_BUDGET,
+					POLL_CONTRACT, POLL_UTILIZE, POLL_REFER, POLL_OPINION, POLL_HIT,
+					POLL_SUBTITLE, POLL_STOPYN, POLL_STOPCOND, POLL_MILEAGE, POLL_MFYN,
+					POLL_AGEYN, POLL_REGIONYN, POLL_INTRO, POLL_MESSAGE, POLL_GUBUN,
+					POLL_SUBJECT, POLL_BGIMG, POLL_QUEST_STATUS, REG_DATE, REG_ID,
+					MOD_DATE, MOD_ID
+				) 
+				VALUES (
+					:vo.pollIdx,
+					:vo.pollField, :vo.pollAsk, :vo.pollDepartment, :vo.pollTitle, :vo.pollTermstart,
+					:vo.pollTermend, :vo.pollTarget, :vo.pollSample, :vo.pollCompany, :vo.pollMethod,
+					:vo.pollContents, :vo.pollKeyword, :vo.pollOpen, :vo.pollGrade, :vo.pollBudget,
+					:vo.pollContract, :vo.pollUtilize, :vo.pollRefer, :vo.pollOpinion, :vo.pollHit,
+					:vo.pollSubtitle, :vo.pollStopyn, :vo.pollStopcond, :vo.pollMileage, :vo.pollMfyn,
+					:vo.pollAgeyn, :vo.pollRegionyn, :vo.pollIntro, :vo.pollMessage, :vo.pollGubun,
+					:vo.pollSubject, :vo.pollBgimg, :vo.pollQuestStatus, sysdate, :vo.regId,
+					sysdate, :vo.modId
+				)
+			]]>
+			</statement>
+		</query>
+
+		<query id="findPollMngByPk">
+			<statement>
+			<![CDATA[
+				SELECT POLL_IDX,
+					   POLL_FIELD, POLL_ASK, POLL_TITLE, POLL_SUBTITLE,
+					   TO_CHAR(POLL_TERMSTART, 'YYYY-MM-DD') POLL_TERMSTART_YMD,
+					   TO_CHAR(POLL_TERMSTART, 'HH24') POLL_TERMSTART_HOUR,
+					   TO_CHAR(POLL_TERMSTART, 'MI') POLL_TERMSTART_MINUTE,
+					   TO_CHAR(POLL_TERMEND, 'YYYY-MM-DD') POLL_TERMEND_YMD,
+					   TO_CHAR(POLL_TERMEND, 'HH24') POLL_TERMEND_HOUR,
+					   TO_CHAR(POLL_TERMEND, 'MI') POLL_TERMEND_MINUTE,
+					   POLL_SAMPLE, POLL_STOPYN, POLL_STOPCOND, POLL_OPEN, POLL_GRADE,
+					   POLL_HIT, POLL_MILEAGE, POLL_KEYWORD, POLL_TARGET, POLL_METHOD,
+					   POLL_MFYN, POLL_AGEYN, POLL_REGIONYN, POLL_SUBJECT, POLL_BGIMG,
+					   POLL_CONTENTS, POLL_INTRO, POLL_MESSAGE,
+					   POLL_QUEST_STATUS
+				FROM POLL_MNG
+				WHERE POLL_IDX = :vo.pollIdx
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PollMng" />
+		</query>
+
+		<query id="findPollMng2ByPk">
+			<statement>
+			<![CDATA[
+				SELECT POLL_IDX,
+					   (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_FIELD) POLL_FIELD_NAME,
+					   (SELECT MAX(SUBSTR(SYS_CONNECT_BY_PATH(CODE_NAME, ', '), 3))
+						FROM (
+							SELECT ROWNUM RN, CODE_NAME
+							FROM DTL_CODE
+							WHERE INSTR((SELECT POLL_ASK FROM POLL_MNG WHERE POLL_IDX = :vo.pollIdx), CODE_ID) <> 0
+						)
+						START WITH RN = 1
+						CONNECT BY PRIOR RN = RN - 1) POLL_ASK_NAME,
+					   POLL_TITLE, POLL_SUBTITLE,
+					   TO_CHAR(POLL_TERMSTART, 'YYYY-MM-DD') POLL_TERMSTART_YMD,
+					   TO_CHAR(POLL_TERMSTART, 'HH24') POLL_TERMSTART_HOUR,
+					   TO_CHAR(POLL_TERMSTART, 'MI') POLL_TERMSTART_MINUTE,
+					   TO_CHAR(POLL_TERMEND, 'YYYY-MM-DD') POLL_TERMEND_YMD,
+					   TO_CHAR(POLL_TERMEND, 'HH24') POLL_TERMEND_HOUR,
+					   TO_CHAR(POLL_TERMEND, 'MI') POLL_TERMEND_MINUTE,
+					   POLL_SAMPLE, POLL_STOPYN, POLL_STOPCOND, POLL_OPEN,
+					   (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PM.POLL_GRADE) POLL_GRADE_NAME,
+					   POLL_HIT, POLL_MILEAGE, POLL_KEYWORD, POLL_TARGET,
+					   (SELECT MAX(SUBSTR(SYS_CONNECT_BY_PATH(CODE_NAME, ', '), 3))
+						FROM (
+							SELECT ROWNUM RN, CODE_NAME
+							FROM DTL_CODE
+							WHERE INSTR((SELECT POLL_METHOD FROM POLL_MNG WHERE POLL_IDX = :vo.pollIdx), CODE_ID) <> 0
+						)
+						START WITH RN = 1
+						CONNECT BY PRIOR RN = RN - 1) POLL_METHOD_NAME,
+					   POLL_MFYN, POLL_AGEYN, POLL_REGIONYN,
+					   (SELECT MAX(SUBSTR(SYS_CONNECT_BY_PATH(CODE_NAME, ', '), 3))
+						FROM (
+							SELECT ROWNUM RN, CODE_NAME
+							FROM DTL_CODE
+							WHERE INSTR((SELECT POLL_SUBJECT FROM POLL_MNG WHERE POLL_IDX = :vo.pollIdx), CODE_ID) <> 0
+						)
+						START WITH RN = 1
+						CONNECT BY PRIOR RN = RN - 1) POLL_SUBJECT_NAME,
+					   POLL_BGIMG, POLL_CONTENTS, POLL_INTRO, POLL_MESSAGE
+				FROM POLL_MNG PM
+				WHERE POLL_IDX = :vo.pollIdx
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PollMng" />
+		</query>
+
+		<query id="updatePollMng">
+			<statement>
+			<![CDATA[
+				UPDATE POLL_MNG
+				SET POLL_FIELD = :vo.pollField, POLL_ASK = :vo.pollAsk, POLL_TITLE = :vo.pollTitle, POLL_SUBTITLE = :vo.pollSubtitle, POLL_TERMSTART = :vo.pollTermstart,
+					POLL_TERMEND = :vo.pollTermend, POLL_SAMPLE = :vo.pollSample, POLL_STOPYN = :vo.pollStopyn, POLL_STOPCOND = :vo.pollStopcond, POLL_OPEN = :vo.pollOpen,
+					POLL_GRADE = :vo.pollGrade, POLL_HIT = :vo.pollHit, POLL_MILEAGE = :vo.pollMileage, POLL_KEYWORD = :vo.pollKeyword, POLL_TARGET = :vo.pollTarget,
+					POLL_METHOD = :vo.pollMethod, POLL_MFYN = :vo.pollMfyn, POLL_AGEYN = :vo.pollAgeyn, POLL_REGIONYN = :vo.pollRegionyn, POLL_SUBJECT = :vo.pollSubject,
+					POLL_BGIMG = :vo.pollBgimg, POLL_CONTENTS = :vo.pollContents, POLL_INTRO = :vo.pollIntro, POLL_MESSAGE = :vo.pollMessage,
+					MOD_DATE = sysdate, MOD_ID = :vo.modId
+				WHERE POLL_IDX = :vo.pollIdx
+			]]>
+			</statement>
+		</query>
+
+		<query id="removePollMng">
+			<statement>
+			<![CDATA[
+				DELETE FROM POLL_MNG 
+				WHERE POLL_IDX = :vo.pollIdx
+			]]>
+			</statement>
+		</query>
+
+		<query id="getNextPollIdx" isDynamic="false">
+			<statement>
+			<![CDATA[
+				SELECT NVL(MAX(POLL_IDX), 0) + 1 POLL_IDX
+				FROM POLL_MNG
+			]]>
+			</statement>
+		</query>
+
+		<query id="findPollPartList">
+			<statement>
+			<![CDATA[
+				SELECT PP.*,
+					   (SELECT CODE_NAME FROM DTL_CODE WHERE CODE_ID = PP.POR_CODE) POR_CODE_NAME
+				FROM POLL_PART PP
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND PART_GUBUN = :vo.partGubun
+				ORDER BY POR_CODE
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PollPart" />
+		</query>
+
+		<query id="findPollAddfileList">
+			<statement>
+			<![CDATA[
+				SELECT *
+				FROM POLL_ADDFILE
+				WHERE POLL_IDX = :vo.pollIdx
+				  AND FILE_GUBUN = :vo.fileGubun
+				ORDER BY S_NO
+			]]>
+			</statement>
+			<result class="seoul.research.domain.PollAddfile" />
+		</query>
+
+		<query id="createPollPart">
+			<statement>
+			<![CDATA[
+				INSERT INTO POLL_PART (
+					POLL_IDX, PART_GUBUN, POR_CODE,
+					PART_NUMBER
+				) 
+				VALUES (
+					:vo.pollIdx, :vo.partGubun, :vo.porCode,
+					:vo.partNumber
+				)
+			]]>
+			</statement>
+		</query>
+
+		<query id="createPollAddfile">
+			<statement>
+			<![CDATA[
+				INSERT INTO POLL_ADDFILE (
+					POLL_IDX, S_NO,
+					FILE_GUBUN, ORG_FNAME, SAV_FNAME, FILE_PATH, FILE_SIZE
+				) 
+				VALUES (
+					:vo.pollIdx, :vo.SNo,
+					:vo.fileGubun, :vo.orgFname, :vo.savFname, :vo.filePath, :vo.fileSize
+				)
+			]]>
+			</statement>
+		</query>
+
+		<query id="removePollPart">
+			<statement>
+			<![CDATA[
+				DELETE FROM POLL_PART
+				WHERE POLL_IDX = :vo.pollIdx
+			]]>
+			</statement>
+		</query>
+
+		<query id="removePollAddfile">
+			<statement>
+			<![CDATA[
+				DELETE FROM POLL_ADDFILE
+				WHERE POLL_IDX = :vo.pollIdx
+				  -- AND FILE_GUBUN = :vo.fileGubun
+			]]>
+			</statement>
+		</query>
+	</queries>
+</queryservice>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dynamic-hibernate>
+	<query name="findCategoryList">
+		<![CDATA[
+		FROM Category category 
+		WHERE 
+			#if($categoryNo)
+				category.categoryNo like :categoryNo
+			#else
+				category.categoryName like :categoryName
+			#end
+			#if ($useYn)
+				AND category.useYn = :useYn
+			#end
+		]]>
+	</query>
+
+	<query name="countCategoryList">
+		<![CDATA[
+		SELECT count(*) 
+		FROM Category category 
+		WHERE 
+			#if($categoryNo)
+				category.categoryNo like :categoryNo
+			#else
+				category.categoryName like :categoryName
+			#end
+			#if ($useYn)
+				AND category.useYn = :useYn
+			#end		
+		]]>
+	</query>	
+</dynamic-hibernate>

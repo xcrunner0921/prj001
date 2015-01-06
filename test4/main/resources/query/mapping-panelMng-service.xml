@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE queryservice PUBLIC "-//ANYFRAME//DTD QUERYSERVICE//EN"
+"http://www.anyframejava.org/dtd/anyframe-core-query-mapping-3.1.dtd">
+<queryservice>
+	<queries>
+		<query id="findPanelMngList" isDynamic="true">
+			<statement>
+			<![CDATA[				
+				SELECT A.PNL_ID , A.PNL_NAME , B.M001_EMAIL AS EMAIL, A.REG_DATE
+				    , SUBSTR(B.M001_BIRTH_DT,0,4)||'-'||SUBSTR(B.M001_BIRTH_DT,5,2)||'-'||SUBSTR(B.M001_BIRTH_DT,7,2)  AS BIRTHDAY
+				    , CASE WHEN B.SIDO = '서울' OR B.SIDO = '경기' OR B.SIDO = '인천' THEN  B.SIDO
+				           ELSE '기타' END SIDO 
+				    , CASE WHEN B.M001_SEX='1' OR B.M001_SEX='3' OR B.M001_SEX='5' OR B.M001_SEX='7' OR B.M001_SEX='9' THEN '남' 
+				           WHEN B.M001_SEX='0' OR B.M001_SEX='2' OR B.M001_SEX='4' OR B.M001_SEX='6' OR B.M001_SEX='8' THEN '여'
+				           ELSE '기타' END MF 
+				    , CASE WHEN A.DELFLAG = 'N' THEN '가입' 
+				           ELSE '탈퇴' END DELFLAG
+				    , A.GRADE 
+				  FROM PANEL A, HISIP.VW_MEM001_M_RESEARCH@SIP B
+				 WHERE 1=1
+				    AND A.PNL_ID = B.M001_ID
+				    
+				#if ($vo.searchRegDatestart !="" and $vo.searchRegDateend != "") /*등록일*/
+					AND TO_CHAR(A.REG_DATE,'YYYY-MM-DD') BETWEEN  :vo.searchRegDatestart AND :vo.searchRegDateend
+				#end
+				
+				#if ($vo.searchPanelStatus != "")
+					AND A.DELFLAG = :vo.searchPanelStatus
+				#end
+				
+				#if($vo.searchText != "")   /*검색어조건*/
+					#if ($vo.searchType =="id")
+						AND A.PNL_ID  LIKE '%' || :vo.searchText || '%'
+					#elseif ($vo.searchType =="name")
+						AND A.PNL_NAME LIKE '%' || :vo.searchText || '%'
+					#end
+				#end
+				
+				ORDER BY A.REG_DATE DESC   
+			]]>
+			</statement>
+			<result class="seoul.research.domain.Panel" />
+		</query>
+
+		<query id="findPanelMng2List" isDynamic="true">
+			<statement>
+			<![CDATA[				
+				SELECT A.PNL_ID, A.PNL_NAME, B.M001_EMAIL EMAIL, A.REG_DATE,
+				       SUBSTR(B.M001_BIRTH_DT, 1, 4) || '-' || SUBSTR(B.M001_BIRTH_DT, 5, 2) || '-' || SUBSTR(B.M001_BIRTH_DT, 7, 2) BIRTHDAY,
+				       CASE WHEN B.SIDO IN ('서울', '경기', '인천') THEN B.SIDO
+				            ELSE '기타'
+				       END SIDO,
+				       CASE WHEN B.M001_SEX IN ('1', '3', '5', '7', '9') THEN '남' 
+				            WHEN B.M001_SEX IN ('2', '4', '6', '8', '0') THEN '여'
+				            ELSE '기타'
+				       END MF,
+				       CASE WHEN A.DELFLAG = 'N' THEN '가입' 
+				            ELSE '탈퇴'
+					   END DELFLAG,
+				       A.GRADE 
+				FROM PANEL A, HISIP.VW_MEM001_M_RESEARCH@SIP B
+				WHERE A.PNL_ID = B.M001_ID
+				#if ($vo.searchRegDatestart != "" and $vo.searchRegDateend != "")
+				  AND TO_CHAR(A.REG_DATE, 'YYYY-MM-DD') BETWEEN :vo.searchRegDatestart AND :vo.searchRegDateend
+				#end
+				#if ($vo.searchPanelStatus != "")
+				  AND A.DELFLAG = :vo.searchPanelStatus
+				#end
+				#if ($vo.searchText != "")
+					#if ($vo.searchType == "id")
+				  AND A.PNL_ID LIKE '%' || :vo.searchText || '%'
+					#elseif ($vo.searchType == "name")
+				  AND A.PNL_NAME LIKE '%' || :vo.searchText || '%'
+					#end
+				#end
+				ORDER BY A.REG_DATE DESC   
+			]]>
+			</statement>
+			<result class="seoul.research.domain.Panel" />
+		</query>
+	</queries>
+</queryservice>

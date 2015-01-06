@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/research2/!svn/ver/565/src/webapp/admincenter/applMng
+END
+addApplMng.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/research2/!svn/ver/565/src/webapp/admincenter/applMng/addApplMng.jsp
+END
+detailApplMng.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/research2/!svn/ver/565/src/webapp/admincenter/applMng/detailApplMng.jsp
+END
+admin_appl.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/research2/!svn/ver/500/src/webapp/admincenter/applMng/admin_appl.jsp
+END
+listApplMng.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/research2/!svn/ver/565/src/webapp/admincenter/applMng/listApplMng.jsp
+END
+updateApplMng.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/research2/!svn/ver/565/src/webapp/admincenter/applMng/updateApplMng.jsp
+END

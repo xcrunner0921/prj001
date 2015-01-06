@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+        "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+        "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+<tiles-definitions>
+	<definition name="template" template="/sample/layouts/layout.jsp">
+		<put-attribute name="header" value="/sample/layouts/top.jsp" />
+		<put-attribute name="body" value="/welcome.do" />
+		<put-attribute name="footer" value="/sample/layouts/left.jsp" />
+	</definition>
+	<definition name="template_simple" template="/sample/layouts/layout_simple.jsp">
+		<put-attribute name="body" value="/welcome.do" />
+	</definition>
+
+	<!-- 홈페이지 레이아웃 시작  -->
+	<definition name="template_empty" template="/sample/layouts/layout_empty.jsp">
+		<put-attribute name="body" value="/welcome.do" />
+	</definition>
+	<!-- 홈페이지 레이아웃 끝  -->
+
+	<!-- xml 레이아웃 시작  -->
+	<definition name="layout_xml" template="/sample/layouts/layout_xml.jsp">
+		<put-attribute name="body" value="/welcome.do" />
+	</definition>
+	<!-- xml 레이아웃 끝  -->
+
+	<definition name="welcomeAction" extends="template_simple">
+		<put-attribute name="body" value="/welcome.do" />
+	</definition>
+	<definition name="welcome" extends="template">
+		<put-attribute name="body" value="/sample/layouts/welcome.jsp" />
+	</definition>
+	<definition name="error" extends="template_empty">
+		<put-attribute name="body" value="/sample/common/error.jsp" />
+	</definition>
+	<definition name="login_error" extends="template_empty">
+		<put-attribute name="body" value="/sample/common/loginError.jsp" />
+	</definition>
+	<definition name="logout" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/login.jsp" />
+	</definition>
+
+	<!--  Category  -->
+	<definition name="listCategory" extends="template">
+		<put-attribute name="body" value="/sample/category/listCategory.jsp" />
+	</definition>
+	<definition name="getCategory" extends="template">
+		<put-attribute name="body" value="/sample/category/updateCategory.jsp" />
+	</definition>
+	<definition name="addCategoryView" extends="template">
+		<put-attribute name="body" value="/sample/category/addCategory.jsp" />
+	</definition>
+	<definition name="listCategoryAction" extends="template_simple">
+		<put-attribute name="body" value="/listCategory.do" />
+	</definition>
+
+	<!--  SurveyMng  -->
+	<definition name="listSurveyMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/surveyMng/listSurveyMng.jsp" />
+	</definition>
+	<definition name="addSurveyMngView" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/surveyMng/addSurveyMng.jsp" />
+	</definition>
+	<definition name="detailSurveyMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/surveyMng/detailSurveyMng.jsp" />
+	</definition>
+	<definition name="updateSurveyMngView" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/surveyMng/updateSurveyMng.jsp" />
+	</definition>
+	<definition name="listSurveyMngAction" extends="template_empty">
+		<put-attribute name="body" value="/listSurveyMng.do" />
+	</definition>
+	<definition name="detailSurveyMngAction" extends="template_empty">
+		<put-attribute name="body" value="/detailSurveyMng.do" />
+	</definition>
+
+	<!--  QuestMng  -->
+	<definition name="listQuestMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/questMng/listQuestMng.jsp" />
+	</definition>
+	<definition name="addQuestMngView" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/questMng/addQuestMng.jsp" />
+	</definition>
+	<definition name="detailQuestMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/questMng/detailQuestMng.jsp" />
+	</definition>
+	<definition name="updateQuestMngView" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/questMng/updateQuestMng.jsp" />
+	</definition>
+	<definition name="listQuestMngAction" extends="template_empty">
+		<put-attribute name="body" value="/listQuestMng.do" />
+	</definition>
+	<definition name="addQuestMngViewAction" extends="template_empty">
+		<put-attribute name="body" value="/addQuestMngView.do" />
+	</definition>
+	<definition name="detailQuestMngAction" extends="template_empty">
+		<put-attribute name="body" value="/detailQuestMng.do" />
+	</definition>
+
+	<!--  AnswerMng  -->
+	<definition name="listAnswerMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/answerMng/listAnswerMng.jsp" />
+	</definition>
+
+	<!--  ApplMng  -->
+	<definition name="listApplMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/applMng/listApplMng.jsp" />
+	</definition>
+	<definition name="addApplMngView" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/applMng/addApplMng.jsp" />
+	</definition>
+	<definition name="detailApplMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/applMng/detailApplMng.jsp" />
+	</definition>
+	<definition name="updateApplMngView" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/applMng/updateApplMng.jsp" />
+	</definition>
+	<definition name="listApplMngAction" extends="template_empty">
+		<put-attribute name="body" value="/listApplMng.do" />
+	</definition>
+	<definition name="detailApplMngAction" extends="template_empty">
+		<put-attribute name="body" value="/detailApplMng.do" />
+	</definition>
+
+
+	<!--  PartMng : 하현숙  -->
+	<definition name="listPartMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/partMng/listPartMng.jsp" />
+	</definition>
+
+
+	<!--  PanelMng : 하현숙  -->
+	<definition name="listPanelMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/panelMng/listPanelMng.jsp" />
+	</definition>
+
+
+	<!--  Survey Web  : 박지훈 : 진행중인 여론조사 -->
+	<definition name="listSurveyWeb" extends="template_empty">
+		<put-attribute name="body" value="/poll/survey/p020101.jsp" />
+	</definition>
+	<definition name="listSurveyWebAction" extends="template_empty">
+		<put-attribute name="body" value="/listSurveyWeb.do" />
+	</definition>
+
+	<!-- Pop : 박지훈 : 조사참여 -->
+	<definition name="getSurveyWeb" extends="template_empty">
+		<put-attribute name="body" value="/poll/survey/popup/popupTemplateS.jsp" />
+	</definition>
+	<definition name="listSurveyQuest" extends="template_empty">
+		<put-attribute name="body" value="/poll/survey/popup/popupTemplate1.jsp" />
+	</definition>
+	<definition name="popupTemplateE" extends="template_empty">
+		<put-attribute name="body" value="/popupTemplateE.do" />
+	</definition>
+	<definition name="getSurveyWebEnd" extends="template_empty">
+		<put-attribute name="body" value="/poll/survey/popup/popupTemplateE.jsp" />
+	</definition>
+	<definition name="popupTemplatePass" extends="template_empty">
+		<put-attribute name="body" value="/popupTemplatePass.do" />
+	</definition>
+	<definition name="getSurveyWebPass" extends="template_empty">
+		<put-attribute name="body" value="/poll/survey/popup/popupTemplatePass.jsp" />
+	</definition>
+
+	<definition name="addQuestViewAction" extends="template_empty">
+		<put-attribute name="body" value="/getSurveyQuest.do" />
+	</definition>
+	<definition name="listSurveyQuestAction" extends="template_empty">
+		<put-attribute name="body" value="/listSurveyWeb.do" />
+	</definition>
+
+	<!--  MyPage Join  : 박지훈 : 내가 참여한 여론조사 -->
+	<definition name="listMyPageJoin" extends="template_empty">
+		<put-attribute name="body" value="/poll/mypage/p040301.jsp" />
+	</definition>
+
+	<!--  Mileage Check  : 박지훈 : 마일리지 체크 -->
+	<definition name="listMileageChk" extends="layout_xml">
+		<put-attribute name="body" value="/mileage/mileage_chk.jsp" />
+	</definition>
+
+	<!--  Mileage Check  : 박지훈 : 모바일 결과보기 -->
+	<definition name="MobileResult" extends="layout_xml">
+		<put-attribute name="body" value="/poll/appl/popup/mobileResult.jsp" />
+	</definition>
+
+	<!--  Popupzone  : 박지훈 : 팝업존 관리 -->
+	<definition name="listPopupzoneMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/popupZone/listPopupzoneMng.jsp" />
+	</definition>
+	<definition name="addPopupzoneMngView" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/popupZone/addPopupzoneMng.jsp" />
+	</definition>
+	<definition name="detailPopupzoneMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/popupZone/detailPopupzoneMng.jsp" />
+	</definition>
+	<definition name="modifyPopupzoneMng" extends="template_empty">
+		<put-attribute name="body" value="/admincenter/popupZone/updatePopupzoneMng.jsp" />
+	</definition>
+	<definition name="listPopupzoneMngAction" extends="template_empty">
+		<put-attribute name="body" value="/listPopupzoneMng.do" />
+	</definition>
+
+	<!-- 하현숙 : 조사결과  -->
+	<definition name="listSurveyResult" extends="template_empty">
+		<put-attribute name="body" value="/poll/appl/p030101.jsp" />
+	</definition>
+	<definition name="findgetPanelInfoByPk" extends="template_empty">
+		<put-attribute name="body" value="/poll/panel/p010101.jsp" />
+	</definition>
+	<definition name="findSurveyResultPopByPk" extends="template_empty">
+		<put-attribute name="body" value="/poll/appl/p030101_pop.jsp" />
+	</definition>
+
+
+
+	<!-- 하현숙 : 패널탈퇴  -->
+	<definition name="getPanelCount" extends="template_empty">
+		<put-attribute name="body" value="/poll/mypage/p040101.jsp" />
+	</definition>
+
+	<!-- 하현숙 : 메인 여론조사결과  -->
+	<definition name="getSurveyResutlMain" extends="template_empty">
+		<put-attribute name="body" value="/poll/index.jsp" />
+	</definition>
+</tiles-definitions>
