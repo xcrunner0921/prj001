@@ -58,7 +58,7 @@
 				
 				#end
 				
-				ORDER BY POLL_IDX DESC
+				ORDER BY POLL_TERMEND DESC
 			]]>
 			</statement>
 			<result class="seoul.research.domain.SurveyResult" />
@@ -68,9 +68,9 @@
 		<query id="findSurveyResultMainList" isDynamic="true">
 			<statement>
 			<![CDATA[	
-			SELECT POLL_TITLE, REG_DATE
+			SELECT POLL_TITLE, REG_DATE, POLL_GUBUN, POLL_IDX, POLL_HIT
 			FROM (
-				SELECT POLL_TITLE, REG_DATE
+				SELECT POLL_TITLE, REG_DATE, POLL_GUBUN, POLL_IDX, POLL_HIT
 				 FROM POLL_MNG
 				WHERE POLL_STOPYN ='N'
 					AND POLL_OPEN = 'Y'
@@ -78,7 +78,8 @@
 				    AND POLL_GRADE = 'GG901'			     
 					#if ($vo.searchPollTitle) 				  
 				    AND (POLL_TITLE || '|' || POLL_KEYWORD || '|' || POLL_CONTENTS   LIKE '%' || :vo.searchPollTitle || '%' )
-					#end  
+					#end
+					AND POLL_HIT = 1
 				ORDER BY POLL_TERMEND DESC
 			)
 			WHERE ROWNUM < 5

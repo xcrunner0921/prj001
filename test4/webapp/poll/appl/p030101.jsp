@@ -127,10 +127,10 @@ function checkAgent(pollIdx, openYn){
             </div>
             <div class="article">
                 <div class="searchBox">
-                    <span id="dateSet">
+                    <span class="dateSet" id="dateSet">
                         <label for="dateSet">조사기간</label>
-                       	<input type="text" name="searchRegDatestart" id="searchRegDatestart" value="<%= regDatestart %>" />~
-						<input type="text" name="searchRegDateend" id="searchRegDateend" value="<%= regDateend %>"  />
+                        <input type="text" name="searchRegDatestart" id="searchRegDatestart" value="<%= regDatestart %>" />~
+                        <input type="text" name="searchRegDateend" id="searchRegDateend" value="<%= regDateend %>"  />
                     </span>
                     <span id="searchSet">
                     	<label for="searchSet">조건</label>
@@ -174,7 +174,7 @@ function checkAgent(pollIdx, openYn){
                         <col width="7%" />
                         <col width="13%" />
                         <col width="7%" />
-                        <col width="7%" />
+						<col width="7%" />
                     </colgroup>
                     <thead>
                     <tr>
@@ -185,7 +185,7 @@ function checkAgent(pollIdx, openYn){
                         <th scope="col">조사<br />방법</th>
                         <th scope="col">기간</th>
                         <th scope="col">참여<br />인원</th>
-                        <th scope="col" class="noLine">보고서<br />공개여부</th>
+						<th scope="col" class="noLine">공개<br />여부</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -210,7 +210,12 @@ function checkAgent(pollIdx, openYn){
                     <%} %>    
                         <td><%= surveyResult.getPollTermstart() %>~<br /><%= surveyResult.getPollTermend() %></td>
                         <td><%= nf.format(surveyResult.getPollSample()) %></td>
-                        <td class="noLine"><%= surveyResult.getPollHit() == "1" ? "공개" : " " %></td>
+						<td class="noLine">
+							<%if (surveyResult.getPollHit() == 1) { %>
+								공개
+							<%} else {%>
+								준비중
+							<%}%>
                     </tr><% } %>
 	            </tbody>
                 </table>
